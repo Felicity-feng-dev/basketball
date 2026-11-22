@@ -169,34 +169,39 @@ html.js #planStage[data-stage="plan"] .card.form{display:none}
 .kidAssessNote button{white-space:nowrap}
 .kidEmpty{padding:24px 10px;text-align:center;color:var(--dim);font-size:12.5px}
 /* ---- 六维雷达图（手写 svg）与班级页「孩子评分」区块 ---- */
-.kidRadar{display:block;width:100%;max-width:276px;height:auto;aspect-ratio:320/300;margin:0 auto}
+.kidRadar{display:block;width:100%;max-width:210px;height:auto;aspect-ratio:210/194;margin:0 auto}
 .kidRadar .rRadarRing{fill:none;stroke:#2b3240;stroke-width:1}
 .kidRadar .rRadarSpoke{stroke:#242b37;stroke-width:1}
 .kidRadar .rRadarNow{fill:rgba(255,122,24,.26);stroke:#ff9f1a;stroke-width:2;stroke-linejoin:round}
 .kidRadar .rRadarPrev{fill:none;stroke:#4aa8ff;stroke-width:1.8;stroke-dasharray:5 4;stroke-linejoin:round}
 .kidRadar .rRadarDot{fill:#ffb020}
-.kidRadar .rRadarLabel{fill:#cfd8e6;font-size:13px;font-weight:600}
-.kidRadar .rRadarScore{fill:#e8eef8;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+.kidRadar .rRadarLabel{fill:#cfd8e6;font-size:11px;font-weight:600}
+.kidRadar .rRadarScore{fill:#e8eef8;font-size:11px;font-weight:800;font-variant-numeric:tabular-nums}
 .kidRadar .rRadarScore.kidUp{fill:var(--ok)}
 .kidRadar .rRadarScore.kidDown{fill:#ff8a8a}
 .kidRadar .rRadarScore.kidFlat{fill:var(--acc2)}
 .kidRadar .rRadarScore.kidNone{fill:var(--dim)}
 .kidBoard{margin:14px 0 4px;border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:12px}
-.kbHead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.kbHead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:8px}
 .kbHead h3{margin:0;font-size:14px;color:var(--acc2)}
 .kbHint{font-size:11px;color:var(--dim)}
-.kbGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px}
+.kbSearch{display:flex;align-items:center;gap:8px;margin:0 0 8px}
+.kbSearch input{flex:1;min-width:0}
+.kbFound{font-size:11px;color:var(--dim);white-space:nowrap;font-variant-numeric:tabular-nums}
+.kbSearch[hidden]{display:none}
+.kbGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:8px}
 .kbItem{min-width:0}
 .kbTap{display:block;width:100%;text-align:left;border:1px solid #293241;background:#0c0f14;
-  border-radius:11px;padding:10px 11px 11px;color:var(--tx)}
+  border-radius:11px;padding:8px 10px;color:var(--tx)}
 .kbTap:hover,.kbTap:focus-visible{border-color:var(--acc);color:var(--tx)}
-.kbTop{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
-.kbTop b{font-size:14px;color:#fff}
-.kbMeta{font-size:10.5px;color:var(--dim);white-space:nowrap}
-.kbChart{display:block;width:100%;margin-top:4px}
-.kbLine{display:block;font-size:12px;color:#d4dce8;line-height:1.55;margin-top:6px}
+.kbTop{display:flex;align-items:baseline;justify-content:space-between;gap:6px;flex-wrap:nowrap}
+.kbTop b{font-size:14px;color:#fff;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kbMeta{font-size:10.5px;color:var(--dim);white-space:nowrap;flex:none}
+.kbChart{display:block;width:100%;margin-top:2px}
+.kbLine{display:-webkit-box;font-size:12px;color:#d4dce8;line-height:1.4;margin-top:4px;
+  -webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .kbPend{display:inline-block;font-size:10.5px;color:#1a1206;background:var(--warn);
-  border-radius:20px;padding:1px 7px;margin-top:6px;font-weight:700}
+  border-radius:20px;padding:1px 7px;margin-top:4px;font-weight:700}
 .kbEmpty{padding:16px 6px;text-align:center;color:var(--dim);font-size:12.5px;line-height:1.6}
 @media(max-width:560px){
   .kidEdit{grid-template-columns:1fr 1fr}
@@ -224,6 +229,8 @@ html.js #planStage[data-stage="plan"] .card.form{display:none}
 .chip{border:1px solid var(--line);border-radius:20px;padding:4px 10px;font-size:12px;cursor:pointer;color:var(--dim);user-select:none}
 .chip.on{border-color:var(--acc);color:var(--acc);background:rgba(255,122,24,.1)}
 .hint{font-size:11px;color:var(--dim);margin-top:6px;line-height:1.5}
+.hint.err{color:#ff9a9a}
+.cpHint.err{color:#ff9a9a}
 .siteGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .siteGrid select{min-width:0}
 .siteCheck{display:flex;align-items:center;gap:7px;margin-top:7px;font-size:12px;color:var(--dim);cursor:pointer}
@@ -551,7 +558,7 @@ body.faOpen main{display:none}
       <div class="card form">
         <h2>① 填需求</h2>
         <div class="field"><label>年龄段</label>
-          <select id="fAge"><option value="PRE">幼儿 3–6 岁</option><option value="U8">U8（7–8 岁）</option><option value="U10" selected>U10（9–10 岁）</option><option value="U12">U12（11–12 岁）</option><option value="JUV">青少年 13–16 岁</option><option value="ADU">成人 17+</option><option value="MIX">混龄 U8–U12</option></select>
+          <select id="fAge"><option value="">请选择年龄段…</option><option value="PRE">幼儿 3–6 岁</option><option value="U8">U8（7–8 岁）</option><option value="U10">U10（9–10 岁）</option><option value="U12">U12（11–12 岁）</option><option value="JUV">青少年 13–16 岁</option><option value="ADU">成人 17+</option><option value="MIX">混龄 U8–U12</option></select>
         </div>
         <div class="field"><label>训练主题</label>
           <select id="fTheme"><option>综合</option><option>运球</option><option>传球</option><option>投篮</option><option>防守</option><option>体能与脚步</option><option>团队配合</option></select>
@@ -560,7 +567,7 @@ body.faOpen main{display:none}
           <div class="row"><select id="fDur"><option>45</option><option selected>60</option><option>75</option><option>90</option><option value="-1">自定义</option></select>
           <input id="fDurCustom" type="number" min="20" max="150" value="60" style="display:none"></div>
         </div>
-        <div class="field"><label>人数</label><input id="fPlayers" type="number" min="4" max="40" value="12"></div>
+        <div class="field"><label>人数</label><input id="fPlayers" type="number" min="4" max="40" placeholder="4–40"></div>
         <div class="field"><label>常用场地</label><input id="fVenue" maxlength="40" placeholder="如：学校室内半场（先存进班级档案）"></div>
         <div class="field"><label>场地条件（按现场过滤环节）</label>
           <div class="siteGrid">
@@ -571,7 +578,7 @@ body.faOpen main{display:none}
           <label class="siteCheck"><input type="checkbox" id="fTight"> 空间不足半场（只排小空间环节）</label>
           <div class="hint" id="siteHint">无篮筐会跳过投篮/上篮类；选半场或勾「空间不足」会跳过全场折返/长距离冲刺类，并写明原因。</div>
         </div>
-        <div class="field"><label>难度</label><select id="fLevel"><option value="1">入门（第一次练）</option><option value="2" selected>进阶（已会基本动作）</option><option value="3">提高（有比赛经验）</option></select></div>
+        <div class="field"><label>难度</label><select id="fLevel"><option value="">请选择难度…</option><option value="1">入门（第一次练）</option><option value="2">进阶（已会基本动作）</option><option value="3">提高（有比赛经验）</option></select></div>
         <div class="field"><label>现有器材（可多选）</label>
           <div class="chips" id="fEquip"></div>
           <div class="hint">不选 = 默认只有球和标志桶。生成时会避开缺器材的环节。</div>
@@ -636,6 +643,10 @@ body.faOpen main{display:none}
           <h3 id="kidBoardTitle">孩子评分 · 六维图</h3>
           <span class="kbHint">实心 = 最近一次，虚线 = 上一次；点一个孩子就逐项改分</span>
         </div>
+        <div class="kbSearch" id="kidSearchRow">
+          <input id="kidSearch" type="search" placeholder="搜孩子名字…" autocomplete="off" aria-label="按名字找孩子">
+          <span class="kbFound" id="kidFound" role="status" aria-live="polite"></span>
+        </div>
         <div class="kbGrid" id="kidBoardList"></div>
       </div>
       <div class="cpEdit" id="classEditor" hidden>
@@ -644,15 +655,15 @@ body.faOpen main{display:none}
           <label class="cpF"><span>班名</span>
             <input id="fClassName" maxlength="30" placeholder="例如：周末A班" aria-label="班名"></label>
           <label class="cpF"><span>年龄段</span>
-            <select id="ceAge" aria-label="年龄段"><option value="PRE">幼儿 3–6 岁</option><option value="U8">U8（7–8 岁）</option><option value="U10">U10（9–10 岁）</option><option value="U12">U12（11–12 岁）</option><option value="JUV">青少年 13–16 岁</option><option value="ADU">成人 17+</option></select></label>
+            <select id="ceAge" aria-label="年龄段"><option value="">请选择…</option><option value="PRE">幼儿 3–6 岁</option><option value="U8">U8（7–8 岁）</option><option value="U10">U10（9–10 岁）</option><option value="U12">U12（11–12 岁）</option><option value="JUV">青少年 13–16 岁</option><option value="ADU">成人 17+</option></select></label>
           <label class="cpF"><span>人数</span>
-            <input id="cePlayers" type="number" min="1" max="60" step="1" aria-label="人数"></label>
+            <input id="cePlayers" type="number" min="1" max="60" step="1" placeholder="如 10" aria-label="人数"></label>
           <label class="cpF"><span>难度</span>
-            <select id="ceLevel" aria-label="难度"><option value="1">1 入门</option><option value="2">2 进阶</option><option value="3">3 提高</option></select></label>
+            <select id="ceLevel" aria-label="难度"><option value="">请选择…</option><option value="1">1 入门</option><option value="2">2 进阶</option><option value="3">3 提高</option></select></label>
           <label class="cpF"><span>场地</span>
             <input id="ceVenue" maxlength="30" placeholder="如：学校室内半场" aria-label="场地"></label>
           <label class="cpF"><span>总课时 M</span>
-            <input id="fTotal" type="number" min="1" max="200" step="1" value="10" aria-label="总课时 M"></label>
+            <input id="fTotal" type="number" min="1" max="200" step="1" placeholder="如 10" aria-label="总课时 M"></label>
         </div>
         <div class="cpF" style="margin-top:10px"><span>器材</span>
           <div class="cpEquip" id="fEquipEdit"></div>
@@ -1713,6 +1724,13 @@ function bcInt(v, lo, hi, fb){
   v=Math.round(Number(v)); if(!isFinite(v)) v=fb;
   return Math.max(lo,Math.min(hi,v));
 }
+/* 必填项不给默认值：空串 / 非数字一律 null，显示时写「未填」 */
+function bcOptInt(v, lo, hi){
+  if(v===undefined || v===null || String(v).trim()==='') return null;
+  const n=Math.round(Number(v));
+  if(!isFinite(n)) return null;
+  return Math.max(lo,Math.min(hi,n));
+}
 function bcDate(v, fb){
   const s=String(v||'').slice(0,10);
   if(/^\d{4}-\d{2}-\d{2}$/.test(s) && isFinite(new Date(s+'T00:00:00').getTime())) return s;
@@ -1765,18 +1783,18 @@ function bcNormClass(x){
   return {
     id:String(x.id||bcId('c_')),
     name:String(x.name||'未命名班级').trim().slice(0,30)||'未命名班级',
-    age:ages.includes(x.age)?x.age:'U10',
-    players:bcInt(x.players,4,40,12),
-    level:[1,2,3].includes(Number(x.level))?Number(x.level):2,
+    age:ages.includes(x.age)?x.age:'',
+    players:bcOptInt(x.players,4,40),
+    level:[1,2,3].includes(Number(x.level))?Number(x.level):null,
     equip:equip,
     venue:String(x.venue||'').trim().slice(0,40),
-    totalLessons:bcInt(x.totalLessons,1,200,10),
+    totalLessons:bcOptInt(x.totalLessons,1,200),
     children:children,
     createdAt:x.createdAt||bcNow(), updatedAt:x.updatedAt||bcNow()
   };
 }
 /* ---------- 六维雷达图（手写内联 SVG，不引库、不画 canvas） ---------- */
-const KID_RADAR={w:320,h:300,cx:160,cy:154,r:82,gap:24,max:5};
+const KID_RADAR={w:210,h:194,cx:105,cy:96,r:60,gap:18,max:5};
 function kidPtsStr(list){ return list.map(p=>p.x.toFixed(2)+','+p.y.toFixed(2)).join(' '); }
 function kidRound(n){ return Math.round(n*100)/100; }
 /* 六个轴顶点：半径 = 分数 / 5 * R，从正上方开始顺时针 */
@@ -1827,11 +1845,20 @@ function kidRadarSvg(latest, prev){
   }
   KID_METRICS.forEach((m,i)=>{
     const p=kidRadarLabelPos(i), wait=pend.indexOf(m[0])>=0, sc=kidRadarScore(latest,prev,m[0]);
-    const lx=kidRound(p.x-(sc?5:0)), sy=kidRound(p.y+4);
+    const side=(i===1||i===2||i===4||i===5), left=(i===4||i===5);
+    let lx=p.x, sx=p.x+5, lAnchor='middle', sAnchor='start', sy=kidRound(p.y+4), sy2=sy;
+    if(side){
+      lAnchor=left?'end':'start'; sAnchor=lAnchor; sx=lx; sy2=kidRound(p.y+22);
+      /* 五字的「·待评」比两个字的轴名宽：贴边收回，11px 下不出画布、不压图 */
+      if(wait && left){ lx=sx=Math.max(p.x,54); }
+      if(wait && !left){ lx=sx=Math.min(p.x,158); }
+    }else if(sc){
+      lx=kidRound(p.x-5); lAnchor='end';
+    }
     parts.push('<g class="rRadarAxis" data-axis="'+m[0]+'">'+
-      '<text class="rRadarLabel" data-axis="'+m[0]+'" x="'+lx+'" y="'+sy+'" text-anchor="'+(sc?'end':'middle')+'">'+
+      '<text class="rRadarLabel" data-axis="'+m[0]+'" x="'+lx.toFixed(2)+'" y="'+sy+'" text-anchor="'+lAnchor+'">'+
       m[1]+(wait?'·待评':'')+'</text>'+
-      (sc?'<text class="rRadarScore '+sc.cls+'" data-for="'+m[0]+'" x="'+kidRound(p.x+5)+'" y="'+sy+'" text-anchor="start">'+sc.text+'</text>':'')+
+      (sc?'<text class="rRadarScore '+sc.cls+'" data-for="'+m[0]+'" x="'+sx.toFixed(2)+'" y="'+sy2+'" text-anchor="'+sAnchor+'">'+sc.text+'</text>':'')+
       '</g>');
   });
   const aria='六维评分雷达图，'+(latest?'最近一次':'还没有评分')+'：'+
@@ -1843,6 +1870,13 @@ function kidRadarSvg(latest, prev){
     '<title>六维评分雷达图</title>'+parts.join('')+'</svg>';
 }
 /* 一句人话小结：谁最强、谁最弱、比上次进步/退步的是谁 */
+/* 只筛显示，不动数据、不换选中、不重排：返回原顺序的新数组 */
+function kidFilterKids(kids,q){
+  const key=String(q==null?'':q).trim().toLowerCase();
+  const list=Array.isArray(kids)?kids:[];
+  if(!key) return list.slice();
+  return list.filter(k=>String(k&&k.name!=null?k.name:'').toLowerCase().indexOf(key)>=0);
+}
 function kidSummaryText(latest, prev){
   if(!latest) return '还没有评分：点这张卡，给六项各打一次分就能看到形状。';
   const vals=KID_METRICS.map(m=>[m[0],m[1],Number(latest[m[0]])||0]);
@@ -1924,10 +1958,10 @@ const classStore={
     const done=hist.filter(h=>h.taught).length;
     const pending=hist.filter(h=>!h.taught && !h.voided).length;
     const voided=hist.filter(h=>h.voided).length;
-    const total=cls.totalLessons;
-    const left=Math.max(0,total-done), over=Math.max(0,done-total);
+    const total=Number(cls.totalLessons)||0;
+    const left=Math.max(0,total-done), over=total?Math.max(0,done-total):0;
     return {done:done,total:total,left:left,over:over,pending:pending,voided:voided,
-      history:hist.length,warn:left<=2};
+      history:hist.length,warn:total>0 && left<=2};
   },
   setTotalLessons(classId,total){
     const all=this.listClasses(), i=all.findIndex(c=>c.id===classId);
@@ -2171,7 +2205,7 @@ if (typeof globalThis !== 'undefined') {
     KID_METRICS:KID_METRICS, KID_KEYS:KID_KEYS, KID_DEFAULT:KID_DEFAULT,
     kidMetricLabel:kidMetricLabel, kidPendingOf:kidPendingOf,
     kidRadarAxes:kidRadarAxes, kidRadarPoints:kidRadarPoints, kidRadarSvg:kidRadarSvg, kidRadarScore:kidRadarScore,
-    kidSummaryText:kidSummaryText, KID_RADAR:KID_RADAR};
+    kidSummaryText:kidSummaryText, kidFilterKids:kidFilterKids, KID_RADAR:KID_RADAR};
 }
 </script>
 <script>
@@ -2263,11 +2297,12 @@ function fmtWhen(at){
 function classFormFields(){
   // 班级页编辑区的六项 + 总课时；改完点「保存」写回选中的那一班
   return {name:$('#fClassName').value.trim(), age:$('#ceAge').value,
-    players:Number($('#cePlayers').value)||12, level:Number($('#ceLevel').value),
+    players:$('#cePlayers').value.trim(), level:$('#ceLevel').value,
     equip:getEditEquip(), venue:$('#ceVenue').value.trim(),
-    totalLessons:Number($('#fTotal').value)||10};
+    totalLessons:$('#fTotal').value.trim()};
 }
 function lessonMeterText(p){
+  if(!p || !p.total) return '总课时未填 · 已上 '+((p&&p.done)||0)+' 节';
   return '第 '+p.done+' 节 / 共 '+p.total+' 节 / 剩 '+p.left+' 节'+(p.over?'（已超 '+p.over+' 节）':'');
 }
 function renderLessonMeter(c){
@@ -2281,27 +2316,31 @@ function renderLessonMeter(c){
   const p=classStore.lessonProgress(c.id);
   if(!p){ pill.hidden=true; if(btn) btn.disabled=true; return null; }
   pill.hidden=false;
-  pill.className='lessonPill'+(p.left<=2?' warn':'')+(p.over?' over':'');
+  pill.className='lessonPill'+(p.warn?' warn':'')+(p.over?' over':'');
   pill.textContent=lessonMeterText(p)+(p.pending?' · 待上 '+p.pending+' 节':'');
   pill.title='已上节数 N 只由该班历史里「已上」条数算出；K≤2 时提示续课';
   if(btn) btn.disabled=false;
   return p;
 }
+function classAgeText(c){ return c&&c.age?c.age:'年龄段未填'; }
+function classPlayersText(c){ return c&&c.players!=null?c.players+' 人':'人数未填'; }
+function classLevelText(c){ return c&&c.level!=null?levelName(c.level):'难度未填'; }
+function classTotalText(c){ return c&&c.totalLessons!=null?c.totalLessons+' 节':'总课时未填'; }
 function classNote(c){
   if(!c){ renderLessonMeter(null);
     return '未选班级：本次只记临时排课，不参与轮换；填班名后点「存回该班」可建新班'; }
   const p=renderLessonMeter(c)||classStore.lessonProgress(c.id);
-  return '已选「'+c.name+'」· '+c.age+' · '+c.players+' 人 · '+lessonMeterText(p)+
+  return '已选「'+c.name+'」· '+classAgeText(c)+' · '+classPlayersText(c)+' · '+lessonMeterText(p)+
     (p.pending?' · 待上 '+p.pending+' 节':'')+' · 下次自动避开最近 2 次环节';
 }
 function applyClass(c){
   if(!c) return;
-  $('#fAge').value=c.age;
-  $('#fPlayers').value=c.players;
-  $('#fLevel').value=String(c.level);
+  $('#fAge').value=c.age||'';
+  $('#fPlayers').value=c.players==null?'':c.players;
+  $('#fLevel').value=c.level==null?'':String(c.level);
   $('#fVenue').value=c.venue||'';
   $('#fClassName').value=c.name;
-  $('#fTotal').value=c.totalLessons;
+  $('#fTotal').value=c.totalLessons==null?'':c.totalLessons;
   document.querySelectorAll('#fEquip .chip').forEach(ch=>ch.classList.toggle('on', c.equip.includes(ch.dataset.e)));
   $('#classNote').textContent=classNote(c);
   syncClassEditor(c);
@@ -2312,7 +2351,7 @@ function refreshClassSelect(){
     all.map(c=>'<option value="'+esc(c.id)+'">'+esc(c.name)+'</option>').join('');
   if(cur && all.some(c=>c.id===cur)) $('#classSel').value=cur;
   else { $('#classSel').value=''; if(cur) classStore.select(null);
-    $('#fTotal').value='10'; renderLessonMeter(null); }
+    $('#fTotal').value=''; renderLessonMeter(null); }
   renderClassList();
 }
 /* ---- 班级页（#187）：列表 + 新建 + 编辑 + 删除 ---- */
@@ -2325,11 +2364,11 @@ function syncClassEditor(c){
   if(!ed.hidden && ed.dataset.cid===c.id) return;
   ed.hidden=false; ed.dataset.cid=c.id;
   $('#fClassName').value=c.name;
-  $('#ceAge').value=c.age;
-  $('#cePlayers').value=c.players;
-  $('#ceLevel').value=String(c.level);
+  $('#ceAge').value=c.age||'';
+  $('#cePlayers').value=c.players==null?'':c.players;
+  $('#ceLevel').value=c.level==null?'':String(c.level);
   $('#ceVenue').value=c.venue||'';
-  $('#fTotal').value=c.totalLessons;
+  $('#fTotal').value=c.totalLessons==null?'':c.totalLessons;
   document.querySelectorAll('#fEquipEdit .chip').forEach(ch=>ch.classList.toggle('on', c.equip.includes(ch.dataset.e)));
 }
 function classRowHtml(c,cur){
@@ -2337,9 +2376,9 @@ function classRowHtml(c,cur){
   return '<button type="button" role="listitem" class="cpRow'+(c.id===cur?' on':'')+'"'+
     ' data-cid="'+esc(c.id)+'"'+(c.id===cur?' aria-current="true"':'')+'>'+
     '<span class="cpName">'+esc(c.name)+'</span>'+
-    '<span class="cpAge">'+esc(c.age)+' · '+c.players+' 人</span>'+
-    '<span class="cpLevel">'+esc(levelName(c.level))+'</span>'+
-    '<span class="cpTotal">共 '+p.total+' 节</span>'+
+    '<span class="cpAge">'+esc(classAgeText(c))+' · '+esc(classPlayersText(c))+'</span>'+
+    '<span class="cpLevel">'+esc(classLevelText(c))+'</span>'+
+    '<span class="cpTotal">'+esc(classTotalText(c))+'</span>'+
     '<span class="cpMeter">已上 '+p.done+' 节</span></button>';
 }
 function kidCardHtml(c,k){
@@ -2357,11 +2396,23 @@ function kidCardHtml(c,k){
 /* 班级页「孩子评分」：每个孩子一张六维图，不点弹窗也看得见 */
 function renderKidBoard(){
   const box=$('#kidBoardList'); if(!box) return;
+  const row=$('#kidSearchRow'), found=$('#kidFound'), search=$('#kidSearch');
   const c=classStore.selectedClass();
-  if(!c){ box.innerHTML='<div class="kbEmpty">还没有选中班级。先在上面新建，或点一行选中；选中后这里每个孩子一张六维图。</div>'; return; }
+  if(!c){
+    if(row) row.hidden=true; if(found) found.textContent='';
+    box.innerHTML='<div class="kbEmpty">还没有选中班级。先在上面新建，或点一行选中；选中后这里每个孩子一张六维图。</div>'; return;
+  }
   const kids=c.children||[];
-  if(!kids.length){ box.innerHTML='<div class="kbEmpty">「'+esc(c.name)+'」还没有孩子。点上面「孩子评分」建一个，建好后这里每个孩子一张六维图。</div>'; return; }
-  box.innerHTML=kids.map(k=>kidCardHtml(c,k)).join('');
+  if(!kids.length){
+    if(row) row.hidden=true; if(search) search.value=''; if(found) found.textContent='';
+    box.innerHTML='<div class="kbEmpty">「'+esc(c.name)+'」还没有孩子。点上面「孩子评分」建一个，建好后这里每个孩子一张六维图。</div>'; return;
+  }
+  if(row) row.hidden=false;
+  const q=search?search.value:'';
+  const shown=kidFilterKids(kids,q);
+  if(found) found.textContent='找到 '+shown.length+' / 共 '+kids.length;
+  box.innerHTML=shown.length?shown.map(k=>kidCardHtml(c,k)).join('')
+    :'<div class="kbEmpty">没找到叫「'+esc(String(q).trim())+'」的孩子</div>';
 }
 function renderClassList(){
   const box=$('#classListBox'); if(!box) return [];
@@ -2447,8 +2498,27 @@ function saveClassFromForm(){
     $('#classEditHint').textContent='已有同名班级「'+f.name+'」，请换一个名字';
     $('#fClassName').select(); return;
   }
+  if(!f.age){
+    $('#classEditHint').textContent='年龄段还没选，请选一个再保存';
+    $('#ceAge').focus(); return;
+  }
+  const players=bcOptInt(f.players,1,60);
+  if(players===null){
+    $('#classEditHint').textContent='人数要填 1–60 的整数，不能空着';
+    $('#cePlayers').focus(); return;
+  }
+  const level=[1,2,3].includes(Number(f.level))?Number(f.level):null;
+  if(level===null){
+    $('#classEditHint').textContent='难度还没选，请选一个再保存';
+    $('#ceLevel').focus(); return;
+  }
+  const totalLessons=bcOptInt(f.totalLessons,1,200);
+  if(totalLessons===null){
+    $('#classEditHint').textContent='总课时要填 1–200 的整数，不能空着';
+    $('#fTotal').focus(); return;
+  }
   const c=classStore.saveClass({id:selected?selected.id:null, name:f.name, age:f.age,
-    players:f.players, level:f.level, equip:f.equip, venue:f.venue, totalLessons:f.totalLessons});
+    players:players, level:level, equip:f.equip, venue:f.venue, totalLessons:totalLessons});
   classStore.select(c.id);
   refreshClassSelect();
   applyClass(c);
@@ -2459,6 +2529,8 @@ function saveClassFromForm(){
 function markTaughtSelected(){
   const c=classStore.selectedClass();
   if(!c){ $('#classNote').textContent='先选班级，再标记已上'; return; }
+  const p0=classStore.lessonProgress(c.id);
+  if(!p0 || !p0.total){ $('#classNote').textContent='先在「编辑班级」里填总课时，再标记已上'; return; }
   const r=classStore.markTaught(c.id,{from:'button'});
   if(!r) return;
   const fresh=classStore.getClass(c.id);
@@ -2468,7 +2540,7 @@ function markTaughtSelected(){
     r.converted?'已把最近一条「待上」记为已上':
     '已补记一条「已上」历史';
   $('#classNote').textContent=action+' · '+lessonMeterText(p)+
-    (p.left<=2?' · '+(p.over?'已超 '+p.over+' 节':'只剩 '+p.left+' 节，请提前续课'):'');
+    (p.warn?' · '+(p.over?'已超 '+p.over+' 节':'只剩 '+p.left+' 节，请提前续课'):'');
   renderClassList();
   if(!$('#classModal').hidden) renderClassModal();
 }
@@ -2505,16 +2577,16 @@ function renderClassModal(){
     return;
   }
   const p=classStore.lessonProgress(c.id);
-  info.innerHTML='<b style="color:#fff">'+esc(c.name)+'</b> · '+esc(c.age)+' · '+c.players+' 人 · '+levelName(c.level)+
+  info.innerHTML='<b style="color:#fff">'+esc(c.name)+'</b> · '+esc(classAgeText(c))+' · '+esc(classPlayersText(c))+' · '+esc(classLevelText(c))+
     ' · 器材：'+esc(c.equip.join('、')||'徒手')+' · 场地：'+esc(c.venue||'未填')+
     ' · 历史 '+p.history+' 条 · 已上 '+p.done+' 条';
   if(panel){
     panel.hidden=false;
     $('#lpText').textContent=lessonMeterText(p);
-    $('#lpWarn').textContent=p.left<=2
+    $('#lpWarn').textContent=p.warn
       ? (p.over?'已超出总课时 '+p.over+' 节':'只剩 '+p.left+' 节，请提前续课或安排下一期')
       : '';
-    $('#lpWarn').className='lpWarn'+(p.left<=2?' on':'');
+    $('#lpWarn').className='lpWarn'+(p.warn?' on':'');
     $('#lpDone').value=p.done;
     $('#lpInfo').textContent='已上 '+p.done+' 条 · 待上 '+p.pending+' 条 · 已冲正 '+p.voided+
       ' 条；N 只由历史里「已上」条数算出，修正会直接改历史标记，不另存第二套数。';
@@ -2670,6 +2742,8 @@ function initKidUI(){
   $('#btnKidScore').addEventListener('click',saveKidScore);
   $('#kidName').addEventListener('keydown',e=>{ if(e.key==='Enter') saveKid(); });
   $('#kidScoreNote').addEventListener('keydown',e=>{ if(e.key==='Enter') saveKidScore(); });
+  const ks=$('#kidSearch');
+  if(ks) ks.addEventListener('input',renderKidBoard);
   const kb=$('#kidBoardList');
   if(kb) kb.addEventListener('click',e=>{
     const b=e.target && e.target.closest ? e.target.closest('.kbTap') : null;
@@ -2748,7 +2822,12 @@ function initClassUI(){
   $('#btnTaught').addEventListener('click',markTaughtSelected);
   $('#btnFixDone').addEventListener('click',fixDone);
   $('#fTotal').addEventListener('change',()=>{
-    const v=bcInt($('#fTotal').value,1,200,10);
+    const v=bcOptInt($('#fTotal').value,1,200);
+    if(v===null){
+      $('#fTotal').value='';
+      $('#classEditHint').textContent='总课时要填 1–200 的整数，不能空着';
+      return;
+    }
     $('#fTotal').value=v;
     const sel=classStore.selectedClass();
     if(!sel){ $('#classEditHint').textContent='先在上面列表里点一个班，再改总课时'; return; }
@@ -2979,10 +3058,27 @@ function initReportUI(){
 function levelName(n){ return n===1?'入门':n===3?'提高':'进阶'; }
 function ageName(a){ return a==='MIX' ? '混龄 U8–U12' : ageShort(a); }
 function build(){
+  const hintBox=$('#buildHint');
+  if(hintBox) hintBox.className='hint';
+  const age=$('#fAge').value;
+  if(!age){
+    if(hintBox){ hintBox.className='hint err'; hintBox.textContent='请先选年龄段，再点「生成」'; }
+    $('#fAge').focus(); return;
+  }
+  const players=bcOptInt($('#fPlayers').value,4,40);
+  if(players===null){
+    if(hintBox){ hintBox.className='hint err'; hintBox.textContent='人数要填 4–40 的整数，再点「生成」'; }
+    $('#fPlayers').focus(); return;
+  }
+  const level=[1,2,3].includes(Number($('#fLevel').value))?Number($('#fLevel').value):null;
+  if(level===null){
+    if(hintBox){ hintBox.className='hint err'; hintBox.textContent='请先选难度，再点「生成」'; }
+    $('#fLevel').focus(); return;
+  }
   const durSel=$('#fDur').value;
   const duration = durSel==='-1' ? Number($('#fDurCustom').value)||60 : Number(durSel);
-  const cfg={age:$('#fAge').value, theme:$('#fTheme').value, duration:duration,
-    players:Number($('#fPlayers').value)||12, level:Number($('#fLevel').value), equip:getEquip(),
+  const cfg={age:age, theme:$('#fTheme').value, duration:duration,
+    players:players, level:level, equip:getEquip(),
     venue:$('#fVenue').value.trim(),
     site:{place:$('#fPlace').value, hoop:$('#fHoop').value, court:$('#fCourt').value, tight:$('#fTight').checked}};
   const cls=classStore.selectedClass();

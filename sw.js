@@ -3,7 +3,7 @@
    缓存名带版本号，激活时清理旧版本。 */
 'use strict';
 
-const CACHE = 'basketball-coach-v14';
+const CACHE = 'basketball-coach-v15';
 const PRECACHE = ['./index.html', './manifest.webmanifest'];
 
 self.addEventListener('install', event => {
