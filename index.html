@@ -1,0 +1,3236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f1115">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="篮球教案">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<title>篮球教案工具 · 青训排课与动作库</title>
+<script>document.documentElement.classList.add('js')</script>
+<style>
+:root{
+  --bg:#0f1115; --panel:#171a21; --panel2:#1d222b; --line:#2b3240;
+  --tx:#e9edf3; --dim:#9aa6b8; --acc:#ff7a18; --acc2:#ffb020;
+  --ok:#38d39f; --warn:#ffcc4d; --bad:#ff5d5d; --blue:#4aa8ff;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--tx);
+  font-family:"Microsoft YaHei","PingFang SC","Noto Sans CJK SC",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+button,input,select{font-family:inherit;font-size:14px;color:var(--tx)}
+button{cursor:pointer;border:1px solid var(--line);background:var(--panel2);border-radius:9px;padding:7px 13px;transition:.15s}
+button:hover{border-color:var(--acc);color:#fff}
+button.primary{background:linear-gradient(135deg,#ff7a18,#ff9f1a);border-color:#ff8c1a;color:#1a1206;font-weight:700}
+button.primary:hover{filter:brightness(1.08)}
+button.ghost{background:transparent}
+button:disabled{opacity:.45;cursor:not-allowed}
+input,select{background:#0c0f14;border:1px solid var(--line);border-radius:8px;padding:7px 9px;outline:none}
+input:focus,select:focus{border-color:var(--acc)}
+header{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,#151922,#101318);position:sticky;top:0;z-index:30;flex-wrap:wrap}
+.logo{font-weight:800;font-size:19px;letter-spacing:.5px}
+.logo b{color:var(--acc)}
+nav{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-start}
+nav button{border-radius:20px;padding:6px 16px}
+nav button.on{background:var(--acc);border-color:var(--acc);color:#1a1206;font-weight:700}
+main{max-width:1280px;margin:0 auto;padding:20px 18px 120px}
+.view{display:none}.view.on{display:block}
+.grid2{display:grid;grid-template-columns:340px 1fr;gap:18px;align-items:start}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}}
+html.js #planStage[data-stage="form"]{display:block;max-width:760px;margin:0 auto}
+html.js #planStage[data-stage="form"] .card.form{max-width:760px;margin:0 auto;padding:22px}
+html.js #planStage[data-stage="plan"]{display:block}
+html.js #planStage[data-stage="plan"] .card.form{display:none}
+#planWrap[hidden]{display:none}
+.classBar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid var(--line);
+  background:var(--panel);border-radius:12px;padding:9px 12px;margin:0 auto 14px;max-width:760px}
+.classBar.wide{max-width:none}
+.classBar .cbField{display:flex;align-items:center;gap:8px;min-width:0}
+.classBar .cbField label{font-size:12px;color:var(--dim);white-space:nowrap}
+.classBar select{min-width:154px;max-width:100%;padding:5px 8px}
+.classBar .cbNote{font-size:11.5px;color:var(--dim);min-width:0}
+.classBar .cbActions{margin-left:auto;display:flex;gap:7px;flex-wrap:wrap}
+.classBar .cbActions button{padding:5px 10px;font-size:12.5px}
+/* ---- 班级页（#187：班级从横栏搬成独立页） ---- */
+.cpWrap{max-width:760px;margin:0 auto}
+.cpHead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.cpHead h2{margin:0;font-size:20px}
+.cpNew{margin-left:auto;min-height:44px;padding:0 18px;font-size:15px;font-weight:700}
+.cpHint{margin:0;width:100%;font-size:12px;color:var(--dim);line-height:1.55}
+.cpList{display:flex;flex-direction:column;gap:8px}
+.cpRow{display:grid;grid-template-columns:minmax(0,1.6fr) repeat(4,minmax(0,1fr));gap:3px 10px;
+  align-items:baseline;width:100%;text-align:left;font-size:13.5px;color:#cfd6e2;cursor:pointer;
+  background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:11px 13px}
+.cpRow:hover{border-color:#3f5673}
+.cpRow.on{border-color:var(--acc);box-shadow:0 0 0 2px rgba(90,169,255,.2)}
+.cpRow .cpName{font-size:15px;font-weight:700;color:#fff;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cpRow .cpAge,.cpRow .cpTotal,.cpRow .cpMeter{font-variant-numeric:tabular-nums;color:#9fb0c6}
+.cpEmpty{border:1px dashed var(--line);border-radius:11px;padding:18px;text-align:center;font-size:14px;color:var(--dim)}
+.cpEmpty[hidden]{display:none}
+.cpTools{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+.cpTools button{min-height:42px}
+.cpEdit{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+.cpEdit[hidden]{display:none}
+.cpEdit h3{margin:0 0 10px;font-size:16px;color:#fff}
+.cpGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.cpF{display:flex;flex-direction:column;gap:5px;min-width:0;font-size:12px;color:var(--dim)}
+.cpF input,.cpF select{width:100%;padding:9px 10px;font-size:15px}
+.cpEquip{display:flex;gap:6px;flex-wrap:wrap}
+.cpActions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.cpActions button{min-height:42px}
+.lessonPill{font-size:12px;font-weight:700;color:#cfe6ff;background:#122033;border:1px solid #2f4a66;
+  border-radius:20px;padding:4px 10px;white-space:nowrap;line-height:1.5}
+.lessonPill[hidden]{display:none}
+.lessonPill.warn{color:#ffd98a;background:#2a1512;border-color:#a3472f;
+  box-shadow:0 0 0 2px rgba(255,92,92,.22)}
+.lessonPill.over{color:#ffb0a0;border-color:#ff5c5c}
+.lessonPanel{border:1px solid #3a465a;background:#12161d;border-radius:10px;padding:10px 12px;margin:0 0 12px}
+.lpHead{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.lpText{font-size:14px;font-weight:700;color:#fff}
+.lpWarn{font-size:12px;color:#ffd98a}
+.lpWarn.on{color:#ffb0a0;font-weight:700}
+.lpFix{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:8px;font-size:12px;color:var(--dim)}
+.lpFix input{width:78px;padding:4px 6px}
+.lpFix button{padding:4px 9px;font-size:12px}
+.lpMsg{font-size:11.5px;color:var(--ok)}
+.histTag{font-size:10px;border:1px solid #2f6a50;color:#8ee6c4;background:#10241c;
+  border-radius:20px;padding:1px 7px;white-space:nowrap}
+.histTag.pending{border-color:#6a5a2f;color:#ffd98a;background:#241f10}
+.histTag.void{border-color:#5a3030;color:#ff9a9a;background:#241010}
+.reuseNote{border:1px solid #7a5a18;background:linear-gradient(90deg,#2a2110,#1a1710);color:#ffd98a;
+  border-radius:11px;padding:9px 13px;margin-bottom:12px;font-size:13px;line-height:1.55}
+.reuseBadge{background:#7a5a18!important;border-color:#a07a22!important;color:#ffe3a3!important}
+.modal{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.72);display:flex;align-items:flex-start;
+  justify-content:center;padding:24px 14px;overflow:auto}
+.modal[hidden]{display:none}
+.modalCard{width:min(760px,100%);background:var(--panel);border:1px solid #3a465a;border-radius:14px;padding:16px;
+  box-shadow:0 18px 60px rgba(0,0,0,.55)}
+.modalHead{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.modalHead h2{margin:0;font-size:17px;color:var(--acc2)}
+.modalHead button{margin-left:auto}
+.modalSub{margin:14px 0 8px;font-size:14px;color:var(--tx)}
+.histItem{border:1px solid var(--line);background:#12161d;border-radius:10px;padding:10px 11px;margin-bottom:8px}
+.histItem .histTop{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.histItem .histTop b{font-size:13.5px}
+.histItem .histTop time{font-size:11.5px;color:var(--dim)}
+.histItem .histTop button{margin-left:auto;padding:3px 8px;font-size:11.5px;color:#ff9a9a;border-color:#5a3030}
+.histItem .histDrills{font-size:12px;color:#c9d2e0;margin-top:5px;line-height:1.6}
+.histItem .histMeta{font-size:11px;color:var(--dim);margin-top:3px}
+.backupRow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-top:1px solid var(--line);
+  margin-top:14px;padding-top:12px}
+.backupRow .hint{flex:1;min-width:180px}
+.modalCard.kidCard{width:min(820px,100%)}
+.modalCard.newClassCard{width:min(440px,100%)}
+.newClassLabel{display:block;margin:14px 0 6px;font-size:13px;color:var(--dim)}
+#newClassName{width:100%;font-size:16px;padding:10px 11px}
+.newClassErr{margin:7px 0 0;color:#ff9a9a;font-size:12.5px}
+.newClassErr[hidden]{display:none}
+.newClassActions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+.classToast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:95;
+  max-width:calc(100% - 28px);padding:10px 16px;border:1px solid #2f8f6b;border-radius:999px;
+  background:#123529;color:#dfffee;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.classToast[hidden]{display:none}
+.kidTop{display:flex;align-items:center;gap:8px;flex-wrap:wrap;border:1px solid var(--line);
+  background:#12161d;border-radius:10px;padding:9px 10px}
+.kidTop label{font-size:12px;color:var(--dim);white-space:nowrap}
+.kidTop select{min-width:190px;flex:1}
+.kidTop .kidCount{font-size:11px;color:var(--dim);white-space:nowrap}
+.kidEdit{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr) auto auto;gap:8px;margin-top:10px}
+.kidEdit input{min-width:0;width:100%}
+.kidEdit button{white-space:nowrap}
+.kidEdit .danger{color:#ff9a9a;border-color:#5a3030}
+.kidHelp{font-size:11px;color:var(--dim);margin-top:6px;line-height:1.5}
+.kidDetail{margin-top:12px;border:1px solid var(--line);background:#12161d;border-radius:11px;padding:11px 12px}
+.kidHero{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.kidHero b{font-size:16px;color:#fff}
+.kidHero span{font-size:11.5px;color:var(--dim)}
+.kidUp{color:var(--ok)}.kidDown{color:#ff8a8a}.kidFlat{color:var(--acc2)}.kidNone{color:var(--dim)}
+.kidRecent{margin-top:11px;border-top:1px dashed var(--line);padding-top:9px}
+.kidChartBox{margin:2px 0 0}
+.kidChartLine{margin:4px 0 0;font-size:12.5px;line-height:1.55;color:#dce4f0;text-align:center}
+.kidRecentHead{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font-size:12px;color:var(--acc2);font-weight:700;margin-bottom:5px}
+.kidRecentHead span{font-size:10.5px;color:var(--dim);font-weight:400}
+.kidNoteItem{display:grid;grid-template-columns:52px minmax(0,1fr);gap:8px;font-size:12.5px;line-height:1.55;padding:3px 0;border-bottom:1px solid #202633}
+.kidNoteItem:last-child{border-bottom:0}
+.kidNoteItem time{font-size:11px;color:var(--dim);font-variant-numeric:tabular-nums}
+.kidNoteItem span{color:#d4dce8;overflow-wrap:anywhere}
+.kidAssess{border-top:1px solid var(--line);margin-top:12px;padding-top:11px}
+.kidAssess h3{margin:0 0 7px;font-size:13.5px;color:var(--acc2)}
+.kidAssessGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.kidAssessGrid .kagDate{grid-column:span 2}
+.kidAssessGrid label{display:block;font-size:10.5px;color:var(--dim)}
+.kidAssessGrid input,.kidAssessGrid select{width:100%;min-width:0;margin-top:3px;padding:6px 7px;font-size:13px}
+.kidAssessNote{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-top:8px}
+.kidAssessNote input{width:100%;min-width:0}
+.kidAssessNote button{white-space:nowrap}
+.kidEmpty{padding:24px 10px;text-align:center;color:var(--dim);font-size:12.5px}
+/* ---- 六维雷达图（手写 svg）与班级页「孩子评分」区块 ---- */
+.kidRadar{display:block;width:100%;max-width:276px;height:auto;aspect-ratio:320/300;margin:0 auto}
+.kidRadar .rRadarRing{fill:none;stroke:#2b3240;stroke-width:1}
+.kidRadar .rRadarSpoke{stroke:#242b37;stroke-width:1}
+.kidRadar .rRadarNow{fill:rgba(255,122,24,.26);stroke:#ff9f1a;stroke-width:2;stroke-linejoin:round}
+.kidRadar .rRadarPrev{fill:none;stroke:#4aa8ff;stroke-width:1.8;stroke-dasharray:5 4;stroke-linejoin:round}
+.kidRadar .rRadarDot{fill:#ffb020}
+.kidRadar .rRadarLabel{fill:#cfd8e6;font-size:13px;font-weight:600}
+.kidRadar .rRadarScore{fill:#e8eef8;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+.kidRadar .rRadarScore.kidUp{fill:var(--ok)}
+.kidRadar .rRadarScore.kidDown{fill:#ff8a8a}
+.kidRadar .rRadarScore.kidFlat{fill:var(--acc2)}
+.kidRadar .rRadarScore.kidNone{fill:var(--dim)}
+.kidBoard{margin:14px 0 4px;border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:12px}
+.kbHead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.kbHead h3{margin:0;font-size:14px;color:var(--acc2)}
+.kbHint{font-size:11px;color:var(--dim)}
+.kbGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px}
+.kbItem{min-width:0}
+.kbTap{display:block;width:100%;text-align:left;border:1px solid #293241;background:#0c0f14;
+  border-radius:11px;padding:10px 11px 11px;color:var(--tx)}
+.kbTap:hover,.kbTap:focus-visible{border-color:var(--acc);color:var(--tx)}
+.kbTop{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.kbTop b{font-size:14px;color:#fff}
+.kbMeta{font-size:10.5px;color:var(--dim);white-space:nowrap}
+.kbChart{display:block;width:100%;margin-top:4px}
+.kbLine{display:block;font-size:12px;color:#d4dce8;line-height:1.55;margin-top:6px}
+.kbPend{display:inline-block;font-size:10.5px;color:#1a1206;background:var(--warn);
+  border-radius:20px;padding:1px 7px;margin-top:6px;font-weight:700}
+.kbEmpty{padding:16px 6px;text-align:center;color:var(--dim);font-size:12.5px;line-height:1.6}
+@media(max-width:560px){
+  .kidEdit{grid-template-columns:1fr 1fr}
+  .kidEdit input{grid-column:1/-1}
+  .kidEdit button{width:100%}
+  .kidAssessGrid{grid-template-columns:1fr 1fr}
+  .kidAssessGrid label:first-child{grid-column:1/-1}
+  .kidAssessNote{grid-template-columns:1fr}
+  .kidAssessNote button{width:100%}
+}
+.planSummary{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border:1px solid #3a465a;
+  background:linear-gradient(90deg,#1b2230,#151a22);border-radius:12px;padding:11px 14px;margin-bottom:14px}
+.planSummary[hidden]{display:none}
+.planSummary .sumTag{font-size:11px;color:#1a1206;background:var(--acc);border-radius:20px;padding:2px 9px;font-weight:700;white-space:nowrap}
+.planSummary .sumMain{font-size:15px;font-weight:700;color:#fff;min-width:0}
+.planSummary .sumMain span{color:var(--dim);font-weight:400;font-size:12px;margin-left:8px}
+.planSummary #btnEdit{margin-left:auto;white-space:nowrap}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+.card h2{margin:0 0 12px;font-size:15px;color:var(--acc2);letter-spacing:.4px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12px;color:var(--dim);margin-bottom:5px}
+.field select,.field input{width:100%}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);border-radius:20px;padding:4px 10px;font-size:12px;cursor:pointer;color:var(--dim);user-select:none}
+.chip.on{border-color:var(--acc);color:var(--acc);background:rgba(255,122,24,.1)}
+.hint{font-size:11px;color:var(--dim);margin-top:6px;line-height:1.5}
+.siteGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.siteGrid select{min-width:0}
+.siteCheck{display:flex;align-items:center;gap:7px;margin-top:7px;font-size:12px;color:var(--dim);cursor:pointer}
+.siteCheck input{width:auto;margin:0;accent-color:var(--acc)}
+.siteNote{border:1px solid #2d3d50;background:#101923;color:#b9cbe0;border-radius:10px;padding:10px 12px;font-size:12px;margin:0 0 12px}
+.siteNote b{color:#8fc6ff}
+.bandNote{border:1px solid #2d4a3b;background:#0f1a14;color:#b7d8c2;border-radius:10px;padding:10px 12px;font-size:12px;margin:0 0 12px;line-height:1.6}
+.bandNote b{color:#8fe0b0}
+.siteWhy{border:1px solid var(--line);border-radius:10px;background:#12161d;padding:10px 12px;margin:10px 0;font-size:12px;color:var(--dim)}
+.siteWhy summary{cursor:pointer;color:var(--acc2);font-weight:600}
+.siteWhy ul{margin:8px 0 0;padding-left:18px;line-height:1.75}
+.siteWhy b{color:var(--tx);font-weight:600}
+.siteWarn{border:1px solid #7a5a18;background:#2a2110;color:#ffd98a;border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.65;margin:10px 0}
+.siteWarn b{color:#ffe6ad}
+.planHead{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.planHead .big{font-size:26px;font-weight:800}
+.stat{display:flex;flex-direction:column;font-size:11px;color:var(--dim)}
+.stat b{font-size:16px;color:var(--tx)}
+.block{display:grid;grid-template-columns:64px 1fr;gap:14px;border:1px solid var(--line);border-radius:12px;
+  padding:12px;margin-bottom:10px;background:var(--panel2);position:relative}
+.block .idx{font-size:12px;color:var(--dim);text-align:center}
+.block .idx b{display:block;font-size:18px;color:var(--acc)}
+.block .mn{font-size:20px;font-weight:800;color:var(--acc2)}
+.block h3{margin:0;font-size:15px}
+.block .meta{font-size:12px;color:var(--dim);display:flex;gap:10px;flex-wrap:wrap;margin:3px 0 6px}
+.block .meta span::before{content:"·";margin-right:4px;color:#3d4757}
+.block .line{font-size:13px;margin:2px 0}
+.block .line b{color:var(--ok);font-weight:600}
+.block .cue{color:var(--warn)}
+.block .svgWrap{width:220px;flex:none}
+.block .body{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.block .body .txt{flex:1;min-width:200px}
+.legend{font-size:10px;color:var(--dim);display:flex;gap:10px;flex-wrap:wrap;margin-top:2px}
+.legend i{font-style:normal}
+.dotO,.dotX,.dotC,.dotB{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:3px;vertical-align:1px}
+.dotO{background:#4aa8ff}.dotX{background:#ff5d5d}.dotC{background:#ffcc4d;border-radius:1px}.dotB{background:#ff9f1a}
+.sum{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--dim);border-top:1px dashed var(--line);padding-top:12px;margin-top:6px}
+.sum b{color:var(--tx)}
+.libGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+/* #194 动作库：按能力维度分组（宽屏不显示分组标题，就是原来那张平铺的网格） */
+.libGroup{grid-column:1/-1;display:block}
+.libBody{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.libGH{display:none}
+.ruleCards{display:none}
+.drill{background:var(--panel);border:1px solid var(--line);border-radius:13px;overflow:hidden;display:flex;flex-direction:column}
+.drill .top{display:flex;gap:10px;padding:11px 12px}
+.drill .top svg{width:132px;height:124px;flex:none;background:#0b0e13;border-radius:8px;border:1px solid #232a36}
+.drill h4{margin:0;font-size:15px}
+.badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px}
+.badge{font-size:10px;border:1px solid var(--line);border-radius:20px;padding:1px 7px;color:var(--dim)}
+.badge.age{border-color:#3a5a7a;color:#8fc6ff}
+.badge.dim{border-color:#5a4a2a;color:#ffce7a}
+.badge.altBadge{border-color:#7a5a18;background:#2a2110;color:#ffd98a}
+.drill .det{padding:0 12px 12px;font-size:12.5px}
+.drill .det dl{margin:0}
+.drill .det dt{color:var(--acc2);font-size:11.5px;margin-top:7px;letter-spacing:.3px}
+.drill .det dd{margin:2px 0 0;color:#c9d2e0}
+.drill .det ul{margin:2px 0 0;padding-left:16px}
+.drill .det li{margin:1px 0}
+.drill.closed .det{display:none}
+.drill .more{width:100%;border:0;border-top:1px solid var(--line);border-radius:0;padding:7px;font-size:12px;color:var(--dim);background:transparent}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{border-bottom:1px solid var(--line);padding:9px 8px;text-align:left;vertical-align:top}
+th{color:var(--acc2);font-weight:600;font-size:12px}
+td b{color:#fff}
+.src{font-size:11.5px;color:var(--dim);word-break:break-all}
+.src a{color:var(--blue);text-decoration:none}
+.src a:hover{text-decoration:underline}
+.rulesFrom{margin:10px 0 0;font-size:12px;color:#8ea0b8}.quote{border-left:2px solid var(--acc);padding-left:9px;color:#aab6c8;font-size:12px;margin-top:4px}
+/* #194 规则页窄屏：不要六列表格，一档一张卡，原文收进「原文」折叠 */
+@media(max-width:680px){
+  #rulesBox .rulesTbl{display:none}
+  .ruleCards{display:block}
+  .ruleCard{background:#12161d;border:1px solid var(--line);border-radius:12px;padding:9px 11px;margin:0 0 9px}
+  .ruleCard h3{margin:0 0 5px;font-size:14.5px;color:var(--acc2)}
+  .rRow{display:grid;grid-template-columns:60px minmax(0,1fr);gap:7px;padding:3px 0;
+    border-top:1px dashed rgba(255,255,255,.07);font-size:12.5px;line-height:1.32}
+  .rRow:first-of-type{border-top:0}
+  .rTag{color:var(--dim);font-size:11.5px;line-height:1.4}
+  .rVal{color:#dbe4f0;min-width:0;overflow-wrap:anywhere;line-height:1.32}
+  .rSrc{margin-top:5px;border-top:1px dashed var(--line);padding-top:5px}
+  .rSrc summary{display:flex;align-items:center;min-height:26px;font-size:12px;color:var(--blue);cursor:pointer}
+  .rSrc .quote{margin:4px 0 0;font-size:12px;line-height:1.55}
+  .rSrc .rNo{font-size:12px;color:var(--dim);margin:4px 0 0;line-height:1.55}
+}
+.timerBar{position:fixed;inset:0;z-index:90;display:none;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  background:radial-gradient(900px 520px at 50% -10%,#28303d 0%,#141820 55%,#0b0e13 100%);
+  padding:max(14px,env(safe-area-inset-top)) 16px max(18px,env(safe-area-inset-bottom))}
+.timerBar.on{display:block}
+body.runOpen{overflow:hidden}
+.runWrap{width:100%;max-width:820px;min-height:100%;margin:0 auto;display:flex;flex-direction:column;gap:9px;padding-bottom:134px}
+.runTop{display:flex;align-items:center;gap:10px;min-height:48px;flex-wrap:wrap}
+.runStep{font-size:18px;font-weight:800;letter-spacing:.04em;color:var(--dim);font-variant-numeric:tabular-nums}
+.runStep b{font-size:28px;color:var(--acc2)}
+.runTotal{margin-left:auto;font-size:12px;color:var(--dim);white-space:nowrap}
+.runTotal b{font-size:17px;color:var(--tx);font-variant-numeric:tabular-nums;margin-left:3px}
+.runExit{min-width:60px;min-height:48px;padding:8px 14px;font-size:14px;border-radius:10px}
+.runTitleRow{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.runTitle{flex:1;min-width:0;margin:0;font-size:clamp(24px,6vw,34px);line-height:1.2;overflow-wrap:anywhere}
+.runMin{flex:none;background:#2a2110;border:1px solid #7a5a18;color:#ffd98a;border-radius:20px;
+  padding:3px 12px;font-size:14px;font-weight:700;margin-top:5px}
+.runSub{font-size:13.5px;color:var(--dim);overflow-wrap:anywhere}
+.runClock{text-align:center;font-size:clamp(64px,20vw,132px);line-height:1;font-weight:800;
+  font-variant-numeric:tabular-nums;color:var(--acc2);letter-spacing:.01em;padding:2px 0 0;text-shadow:0 0 34px rgba(255,176,32,.18)}
+.runProg{height:7px;background:#242b37;border-radius:6px;overflow:hidden;margin:0 0 2px}
+.runProg i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ff7a18,#ffb020);transition:width .3s linear}
+.runGrid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:12px}
+.runPanel{min-width:0;background:rgba(23,26,33,.86);border:1px solid var(--line);border-radius:12px;padding:11px 13px}
+.runLabel{font-size:11px;color:var(--acc2);font-weight:700;letter-spacing:.08em;margin:0 0 5px}
+.runPanel .runLabel+.runLabel{margin-top:10px}
+.runPoints{list-style:none;margin:0;padding:0;font-size:15.5px;line-height:1.6}
+.runPoints li{position:relative;padding:3px 0 3px 16px;overflow-wrap:anywhere}
+.runPoints li::before{content:"·";position:absolute;left:2px;color:var(--acc);font-weight:800}
+.runCue{font-size:17px;line-height:1.55;color:#ffe3a3;overflow-wrap:anywhere}
+.runAssess{font-size:12.5px;line-height:1.55;color:var(--dim);overflow-wrap:anywhere}
+.runCtrls{position:fixed;left:0;right:0;bottom:0;z-index:2;width:100%;max-width:820px;margin:0 auto;
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;
+  padding:10px 16px max(10px,env(safe-area-inset-bottom));
+  background:#0d1117;border-top:1px solid var(--line);box-shadow:0 -12px 30px rgba(0,0,0,.45)}
+.runBtn{width:100%;min-width:0;min-height:48px;padding:9px 6px;font-size:15px;font-weight:700;
+  border-radius:10px;white-space:normal;line-height:1.2}
+.runBtn.danger{border-color:#5a2b2b;color:#ffb3b3}
+@supports (padding-top:env(safe-area-inset-top)){
+  header{padding-top:calc(12px + env(safe-area-inset-top))}
+  .timerBar{padding-top:calc(14px + env(safe-area-inset-top));padding-bottom:calc(18px + env(safe-area-inset-bottom))}
+}
+.prog{height:4px;background:#242b37;border-radius:4px;overflow:hidden;margin-top:5px}
+.prog i{display:block;height:100%;background:linear-gradient(90deg,#ff7a18,#ffb020);width:0}
+.empty{color:var(--dim);text-align:center;padding:40px 10px;font-size:13px}
+footer{color:#5c6678;font-size:11px;text-align:center;padding:20px}
+.reportCard{margin-top:12px}
+.reportCard[hidden]{display:none}
+.reportHead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.reportHead h2{margin:0}
+.reportCard textarea{width:100%;min-height:190px;display:block;background:#0c0f14;color:var(--tx);
+  border:1px solid var(--line);border-radius:9px;padding:10px 11px;outline:none;
+  font-family:inherit;font-size:13px;line-height:1.7;white-space:pre-wrap;resize:vertical;
+  user-select:text;-webkit-user-select:text}
+.reportCard textarea:focus{border-color:var(--acc)}
+.reportBtns{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}
+.reportBtns button{min-height:42px}
+.reportStatus{font-size:11.5px;color:var(--dim);line-height:1.45;flex:1;min-width:180px}
+/* ---- 急救速查（#186 一屏 12 条 / #188 手机优先、顺序条吸顶、锚点跳转、删掉打印） ---- */
+body.faOpen main{display:none}
+.faSheet{max-width:980px;margin:0 auto;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px}
+.faHead{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.faHead h2{margin:0;font-size:23px;letter-spacing:.02em}
+.faSub{margin:3px 0 0;color:var(--dim);font-size:13px;line-height:1.5}
+.faActions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.faActions button{min-height:40px}
+.faStep{position:sticky;top:0;z-index:40;border:1px solid #6b5320;border-left:4px solid var(--warn);
+  background:#241f13;color:#f5e6bf;border-radius:9px;padding:10px 12px;font-size:15px;line-height:1.6;font-weight:600}
+.faStep b{color:#ffd98a}
+.faJump{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.faJumpLabel{font-size:12px;color:var(--dim);margin-right:2px}
+.faJump a{display:inline-flex;align-items:center;min-height:32px;padding:6px 11px;font-size:13px;
+  color:#cfe6ff;background:#152130;border:1px solid #2f4a66;border-radius:999px;text-decoration:none;line-height:1.4}
+.faJump a:hover{border-color:var(--acc)}
+.faGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.faItem{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:12px 13px;
+  break-inside:avoid;scroll-margin-top:72px}
+.faItem:target{border-color:var(--acc)}
+.faItem h3{margin:0 0 7px;font-size:16px;color:var(--acc2)}
+.faDo{display:block;margin:0;font-size:15px;line-height:1.65;color:#dbe4f0}
+.faMust{display:block;margin-top:9px;padding-top:8px;border-top:1px dashed rgba(255,138,122,.34);
+  font-size:15px;line-height:1.6;color:#ffb3a3;font-weight:700}
+.faMust::before{content:"必须就医：";color:#ff8a7a;font-weight:700}
+/* #194 急救：窄屏默认折着，只露标题 + 第一句 */
+.faPrev{display:none}
+.faMore{display:none}
+@media(max-width:560px){
+  .planSummary .sumMain{width:100%}
+  .planSummary #btnEdit{margin-left:0;width:100%}
+  .planHead .planActions{width:100%;margin-left:0!important}
+  .planHead .planActions button{flex:1}
+  .classBar{padding:10px}
+  .classBar .cbField{width:100%;display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 8px}
+  .classBar .cbField label{grid-column:1;grid-row:1;align-self:center}
+  .classBar .cbField select{grid-column:2;grid-row:1;flex:none;width:100%;min-width:0}
+  .cpRow{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:4px}
+  .cpRow .cpName{grid-column:1 / -1}
+  .cpGrid{grid-template-columns:1fr}
+  .cpNew{margin-left:0;width:100%}
+  .lessonPill{width:100%;text-align:center}
+  .classBar .cbNote{width:100%}
+  .classBar .cbActions{width:100%;margin-left:0}
+  .classBar .cbActions button{flex:1;min-width:calc(33% - 6px)}
+  .timerBar{padding-left:12px;padding-right:12px}
+  .runWrap{gap:8px;padding-bottom:134px}
+  .runCtrls{padding-left:12px;padding-right:12px}
+  .runGrid{grid-template-columns:1fr}
+  .runTop{gap:6px}
+  .runStep b{font-size:24px}
+  .runTotal{font-size:11.5px}
+  .runClock{font-size:clamp(60px,20vw,96px)}
+  .runPoints{font-size:14.5px;line-height:1.52}
+  .modal{padding:12px 8px}
+  .modalCard{padding:13px}
+  .faSheet{padding:13px}
+  .faHead h2{font-size:20px}
+  .faActions{width:100%;margin-left:0}
+  .faActions button{flex:1}
+  .faGrid{grid-template-columns:1fr}
+  nav{width:100%;margin-left:0;justify-content:space-between;flex-wrap:nowrap;gap:4px}
+  nav button{padding:6px 6px;font-size:11px;white-space:nowrap;letter-spacing:-.2px}
+}
+@media(max-width:359px){
+  nav{display:grid;grid-template-columns:1fr 1fr}
+}
+/* #194 窄屏压缩：动作库手风琴 / 急救折叠 / 排课一屏。宽屏一律不受影响。 */
+@media(max-width:560px){
+  .libGroup.folded .libBody{display:none}
+  .libGroup{margin-bottom:8px}
+  .libGH{display:flex;width:100%;align-items:center;gap:8px;text-align:left;min-height:44px;
+    background:#12161d;border:1px solid var(--line);border-radius:10px;padding:8px 12px;
+    color:var(--tx);font-size:14px;font-weight:700}
+  .libGH .lgN{margin-left:auto;font-size:12px;color:var(--dim);font-weight:400;white-space:nowrap}
+  .libGH .lgCv{font-size:11px;color:var(--dim);flex:none;transition:transform .15s}
+  .libGroup:not(.folded) .libGH .lgCv{transform:rotate(180deg)}
+  .libGroup:not(.folded) .libBody{display:grid;grid-template-columns:1fr;gap:10px;margin-top:8px}
+  #libGrid .drill .top{padding:9px 10px;gap:9px}
+  #libGrid .drill .top svg{width:96px;height:92px}
+  #libGrid .drill h4{font-size:14px}
+  #libGrid .drill .hint{margin-top:4px;font-size:10.5px;line-height:1.4}
+  #libGrid .drill .more{display:none}
+  #libGrid .drill .det{padding:0 10px 10px;font-size:12px}
+
+  .faItem{padding:11px 12px;cursor:pointer}
+  .faItem.fold .faDo{display:none}
+  .faItem:not(.fold) .faPrev{display:none}
+  .faPrev{display:block;margin:0;font-size:13px;line-height:1.55;color:#b9c5d6}
+  .faMore{display:inline-block;margin-left:6px;font-size:12px;color:var(--blue);white-space:nowrap}
+  .faItem:not(.fold) .faMore{display:none}
+  .faItem h3{position:relative;padding-right:20px}
+  .faItem h3::after{content:"▾";position:absolute;right:0;top:0;font-size:12px;color:var(--dim)}
+  .faItem:not(.fold) h3::after{content:"▴"}
+
+  html.js #planStage[data-stage="form"] .card.form,
+  html.js #planStage .card.form{display:grid;grid-template-columns:1fr 1fr;gap:6px 8px;padding:10px;max-width:100%}
+  #planStage .card.form>h2{grid-row:1;grid-column:1/-1;margin:0 0 2px;font-size:15px}
+  #planStage .card.form>.field{margin:0;min-width:0}
+  #planStage .card.form>.field:nth-child(2){grid-row:2;grid-column:1}
+  #planStage .card.form>.field:nth-child(3){grid-row:2;grid-column:2}
+  #planStage .card.form>.field:nth-child(4){grid-row:3;grid-column:1}
+  #planStage .card.form>.field:nth-child(5){grid-row:3;grid-column:2}
+  #planStage .card.form>.field:nth-child(6){grid-row:4;grid-column:1}
+  #planStage .card.form>.field:nth-child(8){grid-row:4;grid-column:2}
+  #planStage .card.form>.field:nth-child(7){grid-row:5;grid-column:1/-1}
+  #planStage .card.form>.field:nth-child(9){grid-row:6;grid-column:1/-1}
+  #planStage .card.form>#btnBuild{grid-row:7;grid-column:1/-1}
+  #planStage .card.form>#buildHint{grid-row:8;grid-column:1/-1}
+  #planStage .field label{margin-bottom:2px;font-size:11.5px}
+  #planStage .field select,#planStage .field input:not([type="checkbox"]){min-height:38px}
+  #planStage #fLevel{font-size:12.5px}
+  #planStage .siteGrid{grid-template-columns:repeat(3,1fr);gap:5px}
+  #planStage .siteCheck{margin-top:5px;font-size:11.5px}
+  #planStage .chips{gap:5px}
+  #planStage .chips button{padding:5px 9px;font-size:11.5px;min-height:32px}
+  #planStage .card.form .hint{margin-top:3px;font-size:10.5px;line-height:1.35}
+  #planStage #btnBuild{min-height:44px;font-size:15px}
+}
+@media(max-height:520px){
+  .timerBar{padding-top:max(8px,env(safe-area-inset-top));padding-bottom:max(8px,env(safe-area-inset-bottom))}
+  .runWrap{gap:6px;min-height:0;padding-bottom:70px}
+  .runCtrls{grid-template-columns:repeat(6,minmax(0,1fr));padding:8px 12px max(6px,env(safe-area-inset-bottom))}
+  .runTop{min-height:44px}
+  .runExit{min-height:44px;padding:6px 12px}
+  .runTitle{font-size:20px}
+  .runClock{font-size:clamp(46px,17vh,82px)}
+  .runProg{height:5px}
+  .runPanel{padding:8px 10px}
+  .runPoints{font-size:13.5px;line-height:1.45}
+  .runPoints li{padding-top:1px;padding-bottom:1px}
+  .runCue{font-size:15px}
+  .runBtn{min-height:44px;font-size:14px}
+  .runCtrls{gap:6px}
+}
+@media print{
+  header,nav,.timerBar,.classBar,.modal,.card.form,.planSummary,footer,.more,#view-lib,#view-rules,#view-class,#view-safety,.planActions,.reportCard{display:none!important}
+  #view-plan{display:block!important}
+  #planStage{display:block!important;max-width:none!important;margin:0!important}
+  #planWrap{display:block!important}
+  body{background:#fff;color:#000}
+  .block,.card,.drill{border-color:#bbb;background:#fff;color:#000;break-inside:avoid}
+  .block .cue{color:#8a5a00}.block .line b{color:#0a7a4a}
+  .block .meta,.block .idx{color:#555!important}
+  .block .svgWrap svg>rect:first-child{fill:#fff!important}
+  .block .svgWrap svg path[stroke="#39414f"]{stroke:#8a8f98!important}
+  .block .svgWrap svg line[stroke="#cfd6e2"],.block .svgWrap svg line[stroke="#dfe6f2"]{stroke:#333!important}
+  .block .svgWrap svg polygon[fill="#dfe6f2"]{fill:#333!important}
+}
+</style>
+<noscript><style>#planWrap[hidden]{display:block!important}</style></noscript>
+</head>
+<body>
+<header>
+  <div class="logo">篮球<b>教案</b>工具</div>
+  <nav>
+    <button id="navPlan" class="on" data-v="plan">排课</button>
+    <button id="navClass" data-v="class">班级</button>
+    <button id="navLib" data-v="lib">动作库</button>
+    <button id="navRules" data-v="rules">年龄与器材规则</button>
+    <button id="navSafety" data-v="safety">急救速查</button>
+  </nav>
+</header>
+<main>
+  <section id="view-plan" class="view on">
+    <div class="classBar" id="classBar">
+      <div class="cbField"><label for="classSel">班级</label>
+        <select id="classSel"><option value="">临时排课（不存档）</option></select>
+      </div>
+      <span class="lessonPill" id="lessonPill" hidden></span>
+      <span class="cbNote" id="classNote">选班级自动填入档案；也可先建班</span>
+      <div class="cbActions">
+        <button id="btnTaught" class="primary" disabled>标记已上</button>
+        <button id="btnManageClass" class="ghost">班级管理</button>
+      </div>
+    </div>
+    <div class="planSummary" id="planSummary" hidden>
+      <span class="sumTag">教案已生成</span>
+      <div class="sumMain" id="sumMain"></div>
+      <button id="btnEdit" class="ghost">修改需求</button>
+    </div>
+    <div class="grid2" id="planStage" data-stage="form">
+      <div class="card form">
+        <h2>① 填需求</h2>
+        <div class="field"><label>年龄段</label>
+          <select id="fAge"><option value="PRE">幼儿 3–6 岁</option><option value="U8">U8（7–8 岁）</option><option value="U10" selected>U10（9–10 岁）</option><option value="U12">U12（11–12 岁）</option><option value="JUV">青少年 13–16 岁</option><option value="ADU">成人 17+</option><option value="MIX">混龄 U8–U12</option></select>
+        </div>
+        <div class="field"><label>训练主题</label>
+          <select id="fTheme"><option>综合</option><option>运球</option><option>传球</option><option>投篮</option><option>防守</option><option>体能与脚步</option><option>团队配合</option></select>
+        </div>
+        <div class="field"><label>本次总时长（分钟）</label>
+          <div class="row"><select id="fDur"><option>45</option><option selected>60</option><option>75</option><option>90</option><option value="-1">自定义</option></select>
+          <input id="fDurCustom" type="number" min="20" max="150" value="60" style="display:none"></div>
+        </div>
+        <div class="field"><label>人数</label><input id="fPlayers" type="number" min="4" max="40" value="12"></div>
+        <div class="field"><label>常用场地</label><input id="fVenue" maxlength="40" placeholder="如：学校室内半场（先存进班级档案）"></div>
+        <div class="field"><label>场地条件（按现场过滤环节）</label>
+          <div class="siteGrid">
+            <select id="fPlace" aria-label="室内或室外"><option value="in">室内</option><option value="out">室外</option></select>
+            <select id="fHoop" aria-label="有无篮筐"><option value="yes">有篮筐</option><option value="no">无篮筐</option></select>
+            <select id="fCourt" aria-label="半场或全场"><option value="any" selected>场地不限</option><option value="half">半场</option><option value="full">全场</option></select>
+          </div>
+          <label class="siteCheck"><input type="checkbox" id="fTight"> 空间不足半场（只排小空间环节）</label>
+          <div class="hint" id="siteHint">无篮筐会跳过投篮/上篮类；选半场或勾「空间不足」会跳过全场折返/长距离冲刺类，并写明原因。</div>
+        </div>
+        <div class="field"><label>难度</label><select id="fLevel"><option value="1">入门（第一次练）</option><option value="2" selected>进阶（已会基本动作）</option><option value="3">提高（有比赛经验）</option></select></div>
+        <div class="field"><label>现有器材（可多选）</label>
+          <div class="chips" id="fEquip"></div>
+          <div class="hint">不选 = 默认只有球和标志桶。生成时会避开缺器材的环节。</div>
+        </div>
+        <button class="primary" id="btnBuild" style="width:100%;padding:11px">生成整节课教案</button>
+        <div class="hint" id="buildHint">器材与场地按年龄段自动分档；依据与核对状态见「年龄与器材规则」页。</div>
+      </div>
+      <div id="planWrap" hidden>
+        <div id="planOut"><div class="empty">填好上面的需求，点「生成整节课教案」<br>系统按 热身 → 主课 → 放松 自动配平到所选分钟数</div></div>
+        <div class="card reportCard" id="reportCard" hidden>
+          <div class="reportHead"><h2>家长课报</h2><span class="reportStatus" id="reportStatus" aria-live="polite"></span></div>
+          <textarea id="reportText" readonly rows="8" spellcheck="false" aria-label="家长课报，可直接复制"></textarea>
+          <div class="reportBtns">
+            <button class="primary" id="btnCopyReport">复制</button>
+            <button class="ghost" id="btnCloseReport">收起</button>
+            <span class="hint">复制失败时会自动全选，按 Ctrl+C 或长按复制</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="view-lib" class="view">
+    <div class="card" style="margin-bottom:14px">
+      <div class="row" style="flex-wrap:wrap">
+        <div class="field" style="margin:0"><label>年龄段</label><select id="lAge"><option value="">全部</option><option value="PRE">幼儿</option><option value="U8">U8</option><option value="U10">U10</option><option value="U12">U12</option><option value="JUV">青少年</option><option value="ADU">成人</option></select></div>
+        <div class="field" style="margin:0"><label>能力维度</label><select id="lDim"><option value="">全部</option></select></div>
+        <div class="field" style="margin:0"><label>搜索</label><input id="lQ" placeholder="名称 / 技术要点 / 口令"></div>
+      </div>
+    </div>
+    <div class="libGrid" id="libGrid"></div>
+  </section>
+
+  <section id="view-rules" class="view">
+    <div class="card">
+      <h2>年龄段器材与场地规则</h2>
+      <div id="rulesBox"></div>
+
+    </div>
+    <div class="card" style="margin-top:14px">
+      <h2>为什么这样分年龄</h2>
+      <p style="font-size:13px;color:#c9d2e0;margin:0 0 8px">现在按六档排：幼儿 3–6 岁只玩不练，单环节 4–5 分钟、整堂课 30–40 分钟，中间必须休息；U8 神经招募快、注意力短，单环节 6–10 分钟、以游戏化重复为主；U10 开始建立左右手与双脚起跳的对称性；U12 进入青春期前后，力量与协调不同步，技术环节要「慢速正确 → 渐加速」；青少年 13–16 岁单环节可到 12–15 分钟，进半场对抗与基础战术；成人 17+ 加体能、身体接触与阵地战术，强度最高。</p>
+      <p style="font-size:13px;color:#c9d2e0;margin:0">排课器已内置：幼儿档单环节 4–5 分钟且整堂课 30–40 分钟、青少年与成人单环节 12–15 分钟；U8 单环节 ≤10 分钟、主课不超过 3 个技术主题；U12 可加入对抗与战术环节；缺器材自动剔除对应环节。</p>
+    </div>
+  </section>
+
+  <section id="view-class" class="view" aria-labelledby="classPageTitle">
+    <div class="cpWrap">
+      <div class="cpHead">
+        <h2 id="classPageTitle">班级</h2>
+        <button id="btnNewClass" class="primary cpNew" type="button">＋ 新建班级</button>
+        <p class="cpHint" id="classPageHint" role="status" aria-live="polite">点任意一行进入编辑；新建后立刻出现在列表并选中。</p>
+      </div>
+      <div class="cpList" id="classListBox" role="list" aria-label="班级列表"></div>
+      <div class="cpEmpty" id="classEmpty" hidden>还没有班级，点上面新建</div>
+      <div class="cpTools">
+        <button id="btnKids" class="ghost" type="button">孩子评分</button>
+        <button id="btnRecords" class="ghost" type="button">记录 / 备份</button>
+      </div>
+      <div class="kidBoard" id="kidBoard" aria-labelledby="kidBoardTitle">
+        <div class="kbHead">
+          <h3 id="kidBoardTitle">孩子评分 · 六维图</h3>
+          <span class="kbHint">实心 = 最近一次，虚线 = 上一次；点一个孩子就逐项改分</span>
+        </div>
+        <div class="kbGrid" id="kidBoardList"></div>
+      </div>
+      <div class="cpEdit" id="classEditor" hidden>
+        <h3>编辑「<span id="classEditWho">—</span>」</h3>
+        <div class="cpGrid">
+          <label class="cpF"><span>班名</span>
+            <input id="fClassName" maxlength="30" placeholder="例如：周末A班" aria-label="班名"></label>
+          <label class="cpF"><span>年龄段</span>
+            <select id="ceAge" aria-label="年龄段"><option value="PRE">幼儿 3–6 岁</option><option value="U8">U8（7–8 岁）</option><option value="U10">U10（9–10 岁）</option><option value="U12">U12（11–12 岁）</option><option value="JUV">青少年 13–16 岁</option><option value="ADU">成人 17+</option></select></label>
+          <label class="cpF"><span>人数</span>
+            <input id="cePlayers" type="number" min="1" max="60" step="1" aria-label="人数"></label>
+          <label class="cpF"><span>难度</span>
+            <select id="ceLevel" aria-label="难度"><option value="1">1 入门</option><option value="2">2 进阶</option><option value="3">3 提高</option></select></label>
+          <label class="cpF"><span>场地</span>
+            <input id="ceVenue" maxlength="30" placeholder="如：学校室内半场" aria-label="场地"></label>
+          <label class="cpF"><span>总课时 M</span>
+            <input id="fTotal" type="number" min="1" max="200" step="1" value="10" aria-label="总课时 M"></label>
+        </div>
+        <div class="cpF" style="margin-top:10px"><span>器材</span>
+          <div class="cpEquip" id="fEquipEdit"></div>
+        </div>
+        <div class="cpActions">
+          <button id="btnSaveClass" class="primary" type="button">保存</button>
+          <button id="btnClassDel" class="ghost danger" type="button">删除班级</button>
+          <span class="cpHint" id="classEditHint">删班级会连该班的上课记录与孩子评分一起删掉，删前会再确认一次。</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<section id="view-safety" class="view" aria-labelledby="faTitle">
+  <div class="faSheet">
+    <div class="faHead">
+      <div>
+        <h2 id="faTitle">急救速查 · 12 条</h2>
+        <p class="faSub">场上出事按顺序做，再找对应条目；只写有把握的做法，拿不准就送医。</p>
+      </div>
+      <div class="faActions">
+        <button class="ghost" id="btnCloseFirstAid" type="button" onclick="closeFirstAid()">收起</button>
+      </div>
+    </div>
+    <div class="faStep" id="faOrder"><b>顺序：</b>停下来 → 看伤情 → 能处理就处理 → 拿不准立刻送医 / 打 120</div>
+    <nav class="faJump" id="faJump" aria-label="跳到条目">
+      <span class="faJumpLabel">跳到条目</span>
+      <a href="#fa-1">1 崴脚</a><a href="#fa-2">2 擦伤</a><a href="#fa-3">3 撞伤</a><a href="#fa-4">4 抽筋</a>
+      <a href="#fa-5">5 拉伤</a><a href="#fa-6">6 鼻出血</a><a href="#fa-7">7 手指</a><a href="#fa-8">8 眼睛</a>
+      <a href="#fa-9">9 头部</a><a href="#fa-10">10 中暑</a><a href="#fa-11">11 断牙</a><a href="#fa-12">12 出血不止</a>
+    </nav>
+    <div class="faGrid">
+      <div class="faItem" id="fa-1"><h3>1 崴脚 / 扭伤</h3><p class="faDo">马上停，别让他踩地负重；扶到场边坐下或躺下，把脚垫高。有冰就隔着衣服冷敷到不疼，别直接贴皮肤，别揉别掰。<span class="faMust">踩不了地、肿得很快、脚踝外形歪了 → 立刻送医。</span></p></div>
+      <div class="faItem" id="fa-2"><h3>2 擦伤 / 破皮</h3><p class="faDo">用清水冲干净（有生理盐水更好），把沙土冲掉；用干净纱布或敷贴盖住。别拿脏水、泥土、纸巾往伤口上敷。<span class="faMust">伤口深、一直在渗血、脏东西冲不掉、伤在脸上 → 送医。</span></p></div>
+      <div class="faItem" id="fa-3"><h3>3 撞伤 / 淤青</h3><p class="faDo">先停下，别马上揉；有冰就隔着衣服冷敷到不疼；看看有没有肿、有没有变形，能不能照常活动。<span class="faMust">疼得停不下来、肿得厉害、动不了，或撞的是头、腰、肚子 → 送医。</span></p></div>
+      <div class="faItem" id="fa-4"><h3>4 抽筋</h3><p class="faDo">停下，把腿伸直，脚尖往他自己方向慢慢掰，或让别人帮着掰，轻轻揉到松开；缓过来再补水，别马上又上场冲。<span class="faMust">反复抽、抽完整条腿没力、伴呕吐或脸色发白 → 送医。</span></p></div>
+      <div class="faItem" id="fa-5"><h3>5 大腿 / 小腿拉伤</h3><p class="faDo">立刻停，别硬压硬拉去「拉开」；扶到场边把腿放在舒服的位置，有冰就隔着衣服冷敷；能走也先歇着。<span class="faMust">听见「啪」一声、很快起一大块淤青、完全用不上力 → 送医。</span></p></div>
+      <div class="faItem" id="fa-6"><h3>6 鼻出血</h3><p class="faDo">坐着，头稍往前低（别后仰），用嘴呼吸；一直捏住鼻子软的那部分别松手，血往嗓子里流就吐出来，别咽。<span class="faMust">按了很久还止不住、脸色发白、头晕 → 送医。</span></p></div>
+      <div class="faItem" id="fa-7"><h3>7 手指戳伤</h3><p class="faDo">停，别掰别拉别揉；把伤指和旁边手指并在一起，用胶布轻贴固定，手抬高，有冰就隔着衣服冷敷。<span class="faMust">指节歪了、肿得弯不了、同一根指反复戳 → 拍片。</span></p></div>
+      <div class="faItem" id="fa-8"><h3>8 眼睛进东西 / 被戳</h3><p class="faDo">别揉；用清水从内眼角往外冲，或让他多眨眼把东西带出来；被球戳到就闭眼别按别揉。<span class="faMust">冲不出来、看东西模糊、怕光流泪不停、眼球发红或有血 → 立刻送医。</span></p></div>
+      <div class="faItem" id="fa-9"><h3>9 头部撞到</h3><p class="faDo">马上停，让他坐下；问他叫什么、现在几点、刚才在干什么，答不上来就按严重处理；当天别让他一个人待着，别马上回去打球。<span class="faMust">头晕、呕吐、犯困叫不太醒、说话不清、看东西重影 → 立刻送医。</span></p></div>
+      <div class="faItem" id="fa-10"><h3>10 中暑 / 脱水</h3><p class="faDo">马上移到阴凉通风处，解开多余衣服、扇风；清醒的人小口多次喝水（有淡盐水更好）；用湿毛巾擦身降温。<span class="faMust">叫不醒、说胡话、抽搐、皮肤发烫却不出汗 → 立刻打 120。</span></p></div>
+      <div class="faItem" id="fa-11"><h3>11 牙被磕断</h3><p class="faDo">找到断牙，捏牙冠别碰牙根，放进牛奶或清水里带着走；嘴里出血用干净纱布咬住；别用纸巾把断牙包干。<span class="faMust">断牙、牙松动或移位、嘴唇被穿透 → 立刻去口腔科，断牙一起带上。</span></p></div>
+      <div class="faItem" id="fa-12"><h3>12 出血不止</h3><p class="faDo">用干净纱布或毛巾直接压住伤口，持续压着别松手；血浸透了就在上面再加一层，别揭开看；把伤肢抬高。<span class="faMust">压了很久还往外冒、血往外喷、人发白冒冷汗 → 打 120。</span></p></div>
+    </div>
+  </div>
+</section>
+
+<div class="modal" id="classModal" hidden>
+  <div class="modalCard" role="dialog" aria-modal="true" aria-labelledby="classModalTitle">
+    <div class="modalHead">
+      <h2 id="classModalTitle">班级档案与上课记录</h2>
+      <button id="btnCloseModal" class="ghost">关闭</button>
+    </div>
+    <div id="classInfo" class="hint" style="margin-bottom:10px"></div>
+    <div class="lessonPanel" id="lessonPanel" hidden>
+      <div class="lpHead"><span class="lpText" id="lpText"></span><span class="lpWarn" id="lpWarn"></span></div>
+      <div class="lpFix">
+        <label for="lpDone">修正已上节数 N</label>
+        <input id="lpDone" type="number" min="0" max="200" step="1" aria-label="手动修正已上节数">
+        <button id="btnFixDone" class="ghost">按修正值对齐历史</button>
+        <span class="lpMsg" id="lpMsg" aria-live="polite"></span>
+      </div>
+      <div class="hint" id="lpInfo"></div>
+    </div>
+    <h3 class="modalSub">最近 5 次练了什么</h3>
+    <div id="histList"></div>
+    <div class="backupRow">
+      <button id="btnExport" class="primary">导出 JSON 备份</button>
+      <button id="btnImport" class="ghost">导入 JSON</button>
+      <input type="file" id="importFile" accept="application/json,.json" hidden>
+      <span class="hint">只存本机浏览器；导入会覆盖全部班级与记录，覆盖前会确认。</span>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="kidModal" hidden>
+  <div class="modalCard kidCard" role="dialog" aria-modal="true" aria-labelledby="kidModalTitle">
+    <div class="modalHead">
+      <h2 id="kidModalTitle">孩子档案 · <span id="kidClassName">未选班级</span></h2>
+      <button id="btnCloseKid" class="ghost">关闭</button>
+    </div>
+    <div id="kidNoClass" class="kidEmpty" hidden>当前未选班级。先在顶部选择或新建班级，再给孩子建档。</div>
+    <div id="kidBody">
+      <div class="kidTop">
+        <label for="kidSel">孩子</label>
+        <select id="kidSel"><option value="">＋ 新孩子</option></select>
+        <button id="btnKidNew" class="ghost">＋ 新增</button>
+        <span class="kidCount" id="kidCount"></span>
+      </div>
+      <div class="kidEdit">
+        <input id="kidName" maxlength="20" placeholder="姓名（必填）" aria-label="孩子姓名">
+        <input id="kidNote" maxlength="60" placeholder="备注（如：左手弱、注意力短）" aria-label="孩子备注">
+        <button id="btnKidSave" class="primary">保存孩子</button>
+        <button id="btnKidDel" class="ghost danger">删除</button>
+      </div>
+      <div class="kidHelp" id="kidHelp">一个班可建多个孩子；改名/改备注后点保存；删除会连同该孩子的评分一起删。</div>
+      <div id="kidDetail"></div>
+      <div class="kidAssess" id="kidAssess" hidden>
+        <h3>记一次六项评分（1–5 分）</h3>
+        <div class="kidAssessGrid">
+          <label class="kagDate">日期<input type="date" id="kidScoreDate"></label>
+          <label>运球<select id="kidDribble"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select></label>
+          <label>传球<select id="kidPass"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select></label>
+          <label>投篮<select id="kidShoot"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select></label>
+          <label>防守<select id="kidDefense"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select></label>
+          <label>体能<select id="kidStamina"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select></label>
+          <label>意识<select id="kidIq"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select></label>
+        </div>
+        <div class="kidAssessNote">
+          <input id="kidScoreNote" maxlength="80" placeholder="这次表现备注（可选，如：左手运球更稳）" aria-label="本次表现备注">
+          <button id="btnKidScore" class="primary">保存评分</button>
+        </div>
+        <div class="kidHelp" id="kidScoreMsg" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="newClassModal" hidden>
+  <div class="modalCard newClassCard" role="dialog" aria-modal="true" aria-labelledby="newClassTitle">
+    <div class="modalHead">
+      <h2 id="newClassTitle">新建班级</h2>
+      <button id="btnNewClassX" class="ghost" aria-label="取消新建班级">取消</button>
+    </div>
+    <p class="hint" style="margin:0">先起个班名，建好后会出现在顶部下拉并自动选中；年龄、人数等六项可接着补。</p>
+    <label class="newClassLabel" for="newClassName">班名</label>
+    <input id="newClassName" maxlength="30" placeholder="例如：周末A班" autocomplete="off" aria-describedby="newClassErr">
+    <p class="newClassErr" id="newClassErr" role="alert" hidden></p>
+    <div class="newClassActions">
+      <button id="btnNewClassCancel" class="ghost">取消</button>
+      <button id="btnNewClassOk" class="primary">创建班级</button>
+    </div>
+  </div>
+</div>
+<div class="classToast" id="classToast" role="status" aria-live="polite" hidden></div>
+
+<div class="timerBar" id="timerBar" role="dialog" aria-modal="true" aria-label="上课计时" aria-hidden="true">
+  <div class="runWrap">
+    <div class="runTop">
+      <div class="runStep"><b id="tStep">01</b><span>/</span><span id="tCount">01</span></div>
+      <div class="runTotal">剩余总时长 <b id="tTotal">00:00</b></div>
+      <button id="tExit" class="ghost runExit">退出</button>
+    </div>
+    <div class="runTitleRow">
+      <h1 class="runTitle" id="tName">—</h1>
+      <div class="runMin" id="tMin">— 分钟</div>
+    </div>
+    <div class="runSub" id="tSub">—</div>
+    <div class="runClock" id="tClock">00:00</div>
+    <div class="runProg"><i id="tProg"></i></div>
+    <div class="runGrid">
+      <div class="runPanel">
+        <div class="runLabel">动作要点</div>
+        <ul class="runPoints" id="tPoints"></ul>
+      </div>
+      <div class="runPanel">
+        <div class="runLabel">口令</div>
+        <div class="runCue" id="tCue">—</div>
+        <div class="runLabel">评估</div>
+        <div class="runAssess" id="tAssess">—</div>
+      </div>
+    </div>
+    <div class="runCtrls">
+      <button id="tPrev" class="ghost runBtn">上一环节</button>
+      <button id="tToggle" class="primary runBtn">开始</button>
+      <button id="tReset" class="ghost runBtn">重置</button>
+      <button id="tSkip" class="ghost runBtn">跳过</button>
+      <button id="tNext" class="ghost runBtn">下一环节</button>
+      <button id="tStop" class="ghost runBtn danger">结束</button>
+    </div>
+  </div>
+</div>
+<footer>篮球教案工具 · 本地单文件 · 数据与图形均内嵌，不联网也能排课与计时<br>通用常识，不替代医生判断；严重立即就医并打 120</footer>
+
+<script>
+/* ============================================================
+   核心数据与纯函数（自测脚本会抽取本段到 vm 中运行）
+   ============================================================ */
+const DRILLS = [
+{id:'d01',name:'动态拉伸与球感唤醒',phase:'warm',age:['U8','U10','U12'],dur:8,equip:['球'],dim:'体能与脚步',theme:['综合','体能与脚步','运球','传球','投篮','防守','团队配合'],
+ points:['从脚踝到肩颈逐级激活，每侧 8 拍，动作幅度由小到大','球感用「绕腰—绕腿—八字」各 10 圈，眼睛尽量不看球','最后 30 秒做 3 组渐进加速跑，心率到微喘能说话'],
+ errors:[['一上来就冲刺、跳过关节激活','“先给关节上油，再踩油门”'],['绕球时低头死盯，肩背僵硬','“眼睛看前方，球在手上转”']],
+ up:'加入双手同时绕球 + 行进间绕球',down:'原地徒手完成，再持球',
+ assess:'全程无停顿完成 8 分钟，绕球每项 ≥10 圈不掉球',
+ parent:'热身不是走形式，是把关节和神经“叫醒”，今天孩子绕球已经能不看球了。',
+ lay:[['P',120,190,'A'],['P',200,190,'B'],['B',132,196],['M',120,190,120,120],['M',200,190,200,120]]},
+{id:'d02',name:'红绿灯运球（听信号变速）',phase:'warm',age:['U8'],dur:8,equip:['球'],dim:'运球',theme:['运球','综合'],
+ points:['绿灯全速运球、黄灯变向、红灯急停把球护在体侧','急停时双脚前后开立、屈膝降重心，球不过膝','抬头看教练手势，不看球'],
+ errors:[['急停时直腿、球弹到脚面','“屁股坐下，球贴大腿”'],['变向时把球拍得过高，被“抢断”','“变向那一下要低，球像贴地滚”']],
+ up:'加入“红灯做一次体前变向再停”',down:'只做走—停两档，速度减半',
+ assess:'连续 6 次信号反应全部正确，掉球 ≤1 次',
+ parent:'这个游戏练的是“抬头 + 刹车”，孩子能不看球停住，说明球感已经进了身体。',
+ lay:[['P',90,210,'A'],['P',160,220,'B'],['P',230,210,'C'],['C',90,150],['C',160,150],['C',230,150],['M',90,210,90,150],['M',160,220,160,150]]},
+{id:'d03',name:'原地高低运球',phase:'main',age:['U8'],dur:8,equip:['球'],dim:'运球',theme:['运球','综合'],
+ points:['低运球用手指和手腕发力，球反弹不超过膝盖','高运球到腰腹高度，用大臂带动、节奏稳定','非运球手抬起护球，眼睛看教练手指'],
+ errors:[['手掌直上直下“拍”球，声音发闷','“用手指弹，像弹钢琴，不是用巴掌拍”'],['低头盯球、身体跟着球晃','“头抬起来，用余光看球”']],
+ up:'高低交替 10 次 + 换手，加入弱手单独 30 秒',down:'坐姿运球，先把手腕动作做对',
+ assess:'30 秒低运球 ≥25 次不掉球，抬头时间 ≥80%',
+ parent:'今天练“手指弹琴”，孩子能抬头运球，说明手感在长，不是靠眼睛找球。',
+ lay:[['P',160,200,'A'],['B',174,208],['C',160,150],['M',160,200,160,150]]},
+{id:'d04',name:'标志桶绕行运球',phase:'main',age:['U8','U10'],dur:10,equip:['球','标志桶'],dim:'运球',theme:['运球','综合'],
+ points:['绕桶时用外侧手运球，身体内侧贴桶转','每个桶前一步降低重心，用体前变向换手','眼睛看下一个桶，不看当前桶'],
+ errors:[['绕桶半径太大，像画大圈','“贴着桶转，肩膀擦着桶过去”'],['换手时球停在手里（翻腕）','“球要落地再换手，别端着走”']],
+ up:'计时往返 2 组，要求每组比上一组快 1 秒',down:'桶距拉大、只做单手绕行',
+ assess:'5 桶往返 2 趟 ≤35 秒，全程不掉球、不翻腕',
+ parent:'绕桶是“人球合一”的第一关，孩子能贴桶转，说明重心和手都听话了。',
+ lay:[['C',110,220],['C',110,175],['C',110,130],['C',110,85],['P',150,240,'A'],['B',162,246],['M',150,240,110,225]]},
+{id:'d05',name:'体前变向换手',phase:'main',age:['U10'],dur:10,equip:['球'],dim:'运球',theme:['运球','综合'],
+ points:['变向前一步逼近“防守人”，球从体前低点换到另一只手','换手瞬间肩部下沉、探肩护球，球不高于膝','换手后第一步要快，直接越过防守脚'],
+ errors:[['变向太高、球飘到腰部被掏','“变向要低，球擦着地板过”'],['只动手不动脚，原地左右摆','“手换球，脚同时迈出去”']],
+ up:'加入消极防守（伸手干扰）',down:'无防守慢速分解：拍—送—换—迈',
+ assess:'1 分钟连续变向 ≥20 次，失误 ≤2 次；变向后第一步启动 ≤0.5 秒',
+ parent:'变向不是花活，是“换方向那一步更快”，孩子今天学会了先迈脚再换球。',
+ lay:[['P',150,210,'A'],['D',165,165,'X'],['B',162,218],['M',150,210,120,160],['A',162,218,130,175]]},
+{id:'d06',name:'交叉步突破启动',phase:'main',age:['U10'],dur:10,equip:['球','标志桶'],dim:'运球',theme:['运球','团队配合'],
+ points:['变向后用交叉步（异侧脚先落地）抢占防守人前脚','第一步大、低、快，第二步护球','最后一步起跳前把球收在胸前'],
+ errors:[['顺步启动，被防守人卡住路线','“交叉步，脚从防守人身上跨过去”'],['起步直立、球暴露','“第一步低到膝盖高度”']],
+ up:'加一个协防人，要求分球',down:'无防守，只练交叉步 + 2 次运球',
+ assess:'10 次突破 8 次能在 3 秒内到达罚球线延长线',
+ parent:'突破第一步决定能不能过人啊，孩子今天练的就是这“半步优势”。',
+ lay:[['C',120,170],['C',120,120],['P',160,220,'A'],['D',175,180,'X'],['M',160,220,120,160],['M',120,160,105,105]]},
+{id:'d07',name:'胯下 8 字运球',phase:'main',age:['U12'],dur:10,equip:['球'],dim:'运球',theme:['运球'],
+ points:['球从胯下穿过时手在球的后上方推送，不是“捞”','重心下沉、屁股后坐，给球留出通道','左右各 10 次后接一次体前变向，形成组合'],
+ errors:[['弯腰驼背、球砸腿','“先坐下去，再送球”'],['手腕翻转托球（翻腕）','“手心始终朝下”']],
+ up:'连续胯下 30 秒不失误 + 行进间胯下',down:'原地单手胯下递送，慢速找通道',
+ assess:'30 秒连续胯下 ≥18 次且无翻腕',
+ parent:'胯下运球考的是重心，孩子能坐下去运，动作就不会飘。',
+ lay:[['P',160,195,'A'],['B',172,204],['M',160,195,160,150],['C',160,140]]},
+{id:'d08',name:'背后运球换手',phase:'main',age:['U12'],dur:12,equip:['球'],dim:'运球',theme:['运球','团队配合'],
+ points:['球从背后绕到另一侧，落点在身体侧后方、贴近臀部','换手时身体前倾护球，用非运球手挡住防守','换手后立即加速，不做多余摆动'],
+ errors:[['球绕得太远，被身后掏掉','“球贴着屁股走，别甩大圈”'],['换手后原地停顿','“换完就冲，别等防守回位”']],
+ up:'背后 + 体前连续组合，加入防守人',down:'原地慢速背后递球，先建立路线',
+ assess:'20 次背后换手失误 ≤3 次，换手后 3 步内过中线',
+ parent:'背后运球是护球手段，孩子今天能做到“换完就走”，比赛里就少一次被断。',
+ lay:[['P',140,210,'A'],['D',155,165,'X'],['B',152,218],['M',140,210,190,150],['A',152,218,175,165]]},
+{id:'d09',name:'两人原地胸前传球',phase:'main',age:['U8'],dur:8,equip:['球'],dim:'传球',theme:['传球','综合'],
+ points:['双手持球于胸前，拇指下压、食指拨球，球带后旋','传球先蹬地、再伸臂，力量从脚到手','接球时双手迎球、肘微屈，把球收到胸前'],
+ errors:[['只用手臂甩，球软且飘','“先蹬后腿，再推出去”'],['接球时手是硬的，球弹走','“手像枕头，接住就收”']],
+ up:'拉长到 5 米 + 移动接球',down:'缩短到 2 米，先做“推—接”分解',
+ assess:'3 米对传 2 分钟，成功 ≥30 次、掉球 ≤3 次',
+ parent:'传球是两个人的事，孩子今天学会了“先迎球再收球”，接球稳多了。',
+ lay:[['P',90,200,'A'],['P',240,200,'B'],['B',104,206],['A',100,198,230,198]]},
+{id:'d10',name:'三角传球 + 换位',phase:'main',age:['U10'],dur:10,equip:['球'],dim:'传球',theme:['传球','团队配合'],
+ points:['三人成三角，传球后立刻跑向接球人位置，保持三角','接球前先观察下一个传球点，接球即转身面向前场','传球用双手胸前，落点在接球人胸口'],
+ errors:[['传完原地站着，三角塌掉','“传完就跑，去补他的位”'],['接球后才找人，节奏慢半拍','“接球前先看好下一个”']],
+ up:'加第四个球或加防守人干扰',down:'固定不换位，只做三角传球',
+ assess:'连续 20 次传球不落地，换位路线正确 ≥18 次',
+ parent:'三角传球练的是“传完就动”，孩子现在知道传球不是结束，是跑位的开始。',
+ lay:[['P',110,220,'A'],['P',215,215,'B'],['P',165,120,'C'],['A',120,214,205,210],['A',210,205,172,132],['A',172,132,118,212]]},
+{id:'d11',name:'移动接球上步',phase:'main',age:['U10'],dur:10,equip:['球'],dim:'传球',theme:['传球','团队配合'],
+ points:['接球前用“外侧脚—内侧脚”两步调整，接球时脚尖朝篮','接球同时降低重心，球收到腰腹，不举过头','接球后立刻三威胁：投、传、突'],
+ errors:[['原地等球、脚不动','“球没到，脚先到”'],['接球后先直腰再找人','“接球就蹲，蹲着看篮”']],
+ up:'加入防守人贴身，要求接球即突破',down:'无防守、慢速走位接球',
+ assess:'10 次移动接球 8 次能在接球后 1 秒内做出三威胁',
+ parent:'会跑位还要会“接着就做动作”，孩子今天接球不再发愣了。',
+ lay:[['P',90,230,'A'],['P',160,160,'B'],['A',100,222,150,170],['M',90,230,120,190],['M',160,160,190,120]]},
+{id:'d12',name:'长传快攻',phase:'main',age:['U12'],dur:12,equip:['球'],dim:'传球',theme:['传球','团队配合'],
+ points:['抢到球先看前场，双手过头长传，落点在快下队员前方一步','传球弧度平、球速快，不转成“抛投”','接球人全速跑，接球后不减速直接上篮'],
+ errors:[['长传又高又慢，被回防断掉','“平着推，传到他前面”'],['接球人停下来等球','“球追人，不是人等球”']],
+ up:'加一名回防人追防',down:'缩短距离到半场，先练出手角度',
+ assess:'半场长传 10 次成功 ≥7 次，接球到上篮 ≤3 秒',
+ parent:'快攻就是“抢到球那 3 秒”，孩子今天的长传已经能送到队友身前了。',
+ lay:[['P',80,250,'A'],['P',235,90,'B'],['B',94,242],['A',88,242,225,100],['M',235,90,200,60]]},
+{id:'d13',name:'篮下打板投篮',phase:'main',age:['U8'],dur:8,equip:['球'],dim:'投篮',theme:['投篮','综合'],
+ points:['站在篮筐 45° 打板点，球出手打板上方小方框','投篮手托球下方、辅助手扶侧面，出手后手腕下压','每次投完喊“板”，确认自己瞄的是板不是筐'],
+ errors:[['瞄准篮筐正面硬投，球砸前框','“先找板上的小方框”'],['双手一起推，没有固定投篮手','“一只手投，一只手扶”']],
+ up:'左右 45° 各 10 球，记录命中',down:'站到篮下 1 米，只做单手托球打板',
+ assess:'左右各 10 球，打板命中 ≥12 球',
+ parent:'小孩先学打板，比直接投筐更容易进，孩子今天已经能找到板上的小方框了。',
+ lay:[['P',205,120,'A'],['B',215,126],['M',205,120,200,95],['C',205,150]]},
+{id:'d14',name:'一步上篮（右脚起跳）',phase:'main',age:['U8'],dur:10,equip:['球'],dim:'投篮',theme:['投篮','综合'],
+ points:['右手上篮用右脚起跳、左膝上抬，非起跳脚先落地','起跳前把球举到肩上方，出手点靠近篮筐','落地屈膝缓冲，不直腿砸地'],
+ errors:[['同手同脚起跳','“右手投，右脚蹬”'],['起跳太远，变成“抛”球','“再近一步，跳到篮边再出手”']],
+ up:'从 45° 运球一步上篮',down:'无球起跳摸板，先建立脚步',
+ assess:'10 次右手上篮命中 ≥6 次，脚步错误 ≤1 次',
+ parent:'上篮先学脚步再学投，孩子今天“右脚起跳”已经顺过来了。',
+ lay:[['P',220,150,'A'],['B',232,156],['M',220,150,195,85],['M',195,85,185,60],['C',235,170]]},
+{id:'d15',name:'三步上篮分解',phase:'main',age:['U10'],dur:12,equip:['球'],dim:'投篮',theme:['投篮','综合'],
+ points:['接球后“一大、二小、三高跳”，第二步要短促','收球时机在第二步落地前，球从腰腹举到肩上方','左右手各练，弱手用左脚踏跳'],
+ errors:[['三步变四步、走步','“数出声：一、二、跳”'],['第二步太大，起跳没高度','“第二步收着点，往上跳”']],
+ up:'接传球后全速三步上篮',down:'徒手走脚步 + 持球慢速',
+ assess:'左右手各 10 次，走步 ≤1 次，命中 ≥12 球',
+ parent:'三步上篮的节奏是“大—小—跳”，孩子今天数着拍子做，走步少多了。',
+ lay:[['P',245,210,'A'],['B',255,216],['M',245,210,205,150],['M',205,150,190,95],['M',190,95,180,65]]},
+{id:'d16',name:'罚球线定点投篮',phase:'main',age:['U10'],dur:10,equip:['球'],dim:'投篮',theme:['投篮'],
+ points:['双脚与肩同宽、投篮脚稍前，脚尖对准篮筐','屈膝—蹬地—伸臂—压腕，力量从下往上一条线','出手后保持“鹅颈”手型 1 秒，不急着收手'],
+ errors:[['下肢不发力，全靠手臂推','“先蹲后投，用腿送球”'],['出手后手立刻放下，看不出跟随','“手停在半空，数一秒”']],
+ up:'5 个点各 5 球，记录命中率',down:'缩短到罚球线内 1 米',
+ assess:'罚球线 10 球命中 ≥4 球，动作完整率 ≥8/10',
+ parent:'罚球练的是“固定动作”，孩子今天出手后能把手停住，这就是稳定性。',
+ lay:[['P',160,150,'A'],['B',172,156],['M',160,150,160,120],['C',160,130]]},
+{id:'d17',name:'接球即投',phase:'main',age:['U12'],dur:12,equip:['球'],dim:'投篮',theme:['投篮','团队配合'],
+ points:['接球前双脚已调整好，接球同时屈膝下沉','接球不落地直接起，出手节奏“接—蹲—起”一气','投篮脚先落地，保证身体正对篮筐'],
+ errors:[['接球后先站直再投，慢半拍','“接着就起，别先站直”'],['脚没对准，身体歪着投','“先转脚，再起跳”']],
+ up:'加扑防人，要求快速出手',down:'无防守定点接球投',
+ assess:'10 次接球即投命中 ≥5 次，平均出手 ≤1.2 秒',
+ parent:'比赛里没人让你站稳了投，孩子今天练的就是“接着就起”。',
+ lay:[['P',120,170,'A'],['P',230,220,'B'],['A',220,212,132,178],['M',120,170,120,130],['D',150,190,'X']]},
+{id:'d18',name:'急停跳投',phase:'main',age:['U12'],dur:12,equip:['球'],dim:'投篮',theme:['投篮','运球'],
+ points:['最后一次运球用力拍、球回到手中同时双脚急停','急停用“1-2”节奏，脚尖朝篮，重心落在两脚之间','起跳垂直向上，空中保持投篮手型'],
+ errors:[['急停刹不住、身体前冲','“最后一步踩死，屁股往后坐”'],['急停后仰着投，力量散','“先停稳，再直着跳”']],
+ up:'接变向急停跳投',down:'无防守原地“拍—停—投”分解',
+ assess:'10 次急停跳投命中 ≥4 次，走步 0 次',
+ parent:'急停跳投是“刹车 + 起跳”两件事，孩子今天刹车稳了，投篮才有力。',
+ lay:[['P',180,220,'A'],['B',192,226],['M',180,220,160,150],['M',160,150,160,120],['D',175,180,'X']]},
+{id:'d19',name:'防守基本站姿与滑步',phase:'main',age:['U8'],dur:8,equip:['标志桶'],dim:'防守',theme:['防守','体能与脚步'],
+ points:['双脚比肩宽、屈膝降重心，屁股后坐像坐椅子','滑步时先动前脚、后脚跟上，双脚不交叉','双手一高一低张开，眼睛盯对方腰腹'],
+ errors:[['直腿站着、弯腰撅屁股','“膝盖弯、背挺直，像坐小椅子”'],['滑步时两脚碰在一起','“脚不许打架，留一条缝”']],
+ up:'听口令前后左右变向滑步',down:'扶墙做蹲姿，先建立腿部姿势',
+ assess:'连续滑步 20 秒不掉重心、脚不交叉',
+ parent:'防守先学“坐”，孩子今天能蹲住滑步，就不容易被一步过。',
+ lay:[['P',150,200,'A'],['D',150,150,'X'],['C',110,150],['C',190,150],['M',150,150,120,150],['M',150,150,180,150]]},
+{id:'d20',name:'一对一防守脚步',phase:'main',age:['U10'],dur:10,equip:['球'],dim:'防守',theme:['防守','团队配合'],
+ points:['与进攻人保持一臂距离，重心低于对方','对方运球变向时，用滑步跟、不跨步、不伸手掏','把对方往边线逼，不让他走中路'],
+ errors:[['一上来就伸手掏球，被一步过','“先站稳，再伸手”'],['跟着球转头，身体失去位置','“看腰，不看球”']],
+ up:'半场 1v1，限制进攻人 8 秒',down:'无球跟随滑步',
+ assess:'连续 5 个回合，被一步过 ≤1 次',
+ parent:'防守不是抢断，是“站在他前面”，孩子今天学会了用脚步跟人。',
+ lay:[['P',160,210,'A'],['D',160,165,'X'],['B',172,216],['M',160,210,120,180],['M',160,165,130,155]]},
+{id:'d21',name:'关门协防',phase:'main',age:['U12'],dur:10,equip:['球'],dim:'防守',theme:['防守','团队配合'],
+ points:['持球人突破时，邻近防守人快速横移，与主防人肩并肩“关门”','关门时两人内侧脚靠拢、不留缝隙，双手下垂防走步','关门后立刻回位，防止分球空切'],
+ errors:[['关门慢半拍，被从缝里钻过','“他一下球，你就动”'],['关门后两人撞在一起','“肩并肩，不是脸对脸”']],
+ up:'3v3 中实战触发关门',down:'无球慢速走位关门',
+ assess:'10 次突破 8 次成功关门，漏人 ≤2 次',
+ parent:'“关门”是两个人的默契，孩子今天知道队友被过要立刻补上去。',
+ lay:[['P',160,200,'A'],['D',160,160,'X'],['D',205,160,'Y'],['M',160,200,130,150],['M',205,160,175,158]]},
+{id:'d22',name:'抢篮板卡位',phase:'main',age:['U12'],dur:10,equip:['球'],dim:'防守',theme:['防守','团队配合'],
+ points:['投篮出手先找自己的人，转身用屁股和背把他挡在身后','卡位时双脚比肩宽、重心低、双臂张开','球碰筐后再跳，双手抓球收到胸前'],
+ errors:[['盯着球看，被人从身后冲进来','“先找人，再找球”'],['只跳不顶，位置被挤掉','“先顶住，再起跳”']],
+ up:'1v1 抢篮板 + 二次进攻',down:'无对抗转身卡位练习',
+ assess:'10 次投篮篮板，卡位成功 ≥7 次',
+ parent:'篮板球七成靠卡位，孩子今天学会了“先挡人再拿球”。',
+ lay:[['P',150,120,'A'],['D',165,140,'X'],['B',160,45],['M',160,45,150,110],['M',165,140,172,120]]},
+{id:'d23',name:'绳梯脚步',phase:'main',age:['U8'],dur:8,equip:['标志桶'],dim:'体能与脚步',theme:['体能与脚步','综合'],
+ points:['一步一格、前脚掌落地，声音越轻越好','手臂自然摆动，上身保持稳定不左右晃','先慢后快，动作正确再加速度'],
+ errors:[['整只脚掌砸地、声音大','“前脚掌落地，像猫走路”'],['追求快导致乱步、踩格','“先做对，再求快”']],
+ up:'加入侧向进出 + 交叉步',down:'用标志桶摆直线，做高抬腿',
+ assess:'往返 2 组动作标准，踩错格 ≤2 次',
+ parent:'脚步是篮球的地基，孩子今天前脚掌落地，启动会更快。',
+ lay:[['C',110,230],['C',135,230],['C',160,230],['C',185,230],['C',210,230],['P',235,230,'A'],['M',235,230,105,230]]},
+{id:'d24',name:'折返跑 + 侧滑步组合',phase:'main',age:['U10'],dur:10,equip:['标志桶'],dim:'体能与脚步',theme:['体能与脚步','防守'],
+ points:['折返时用前脚掌急停、手触线，转身先转髋','侧滑步段保持低重心，不交叉脚','全程鼻吸口呼，节奏不散'],
+ errors:[['急停用脚跟刹，容易滑倒','“前脚掌踩住，屁股坐下去”'],['滑步段站起来跑','“滑步时头不许升高”']],
+ up:'计时 3 组，组间休息 45 秒',down:'缩短距离、去掉计时',
+ assess:'一组 17 米折返 + 10 米滑步 ≤22 秒，动作不变形',
+ parent:'体能不是傻跑，孩子今天学会了“急停用前脚掌”，变向会快半秒。',
+ lay:[['C',80,240],['C',240,240],['C',80,160],['P',160,250,'A'],['M',160,250,80,240],['M',80,240,240,240]]},
+{id:'d25',name:'单脚平衡传接球',phase:'warm',age:['U8'],dur:8,equip:['球'],dim:'体能与脚步',theme:['体能与脚步','传球','综合'],
+ points:['单脚站立，另一脚离地，接球时不许落地','接球后把球举过头顶保持 3 秒，再传回','左右脚各 30 秒，失败就换脚'],
+ errors:[['一接球就落脚','“脚粘在地上，球到手也不许落”'],['为了平衡把球抱死，手臂僵硬','“手放松，用肚子收住”']],
+ up:'闭眼单脚站立 + 传接球',down:'双脚与肩同宽，先做接球举球',
+ assess:'单脚接球成功 ≥8 次/30 秒，落地 ≤2 次',
+ parent:'平衡是变向和对抗的底子，孩子今天单脚接球已经能站住了。',
+ lay:[['P',110,210,'A'],['P',220,210,'B'],['B',124,216],['A',120,208,210,208],['C',160,210]]},
+{id:'d26',name:'跳跃落地缓冲',phase:'main',age:['U10'],dur:8,equip:['标志桶'],dim:'体能与脚步',theme:['体能与脚步'],
+ points:['起跳双脚同时发力，落地时前脚掌先着地、屈髋屈膝','落地时膝盖对准脚尖，不内扣','落地声音越轻越好，像“猫落地”'],
+ errors:[['落地直腿、膝盖内扣','“落地就蹲，膝盖对着脚尖”'],['单脚落地不稳、身体歪','“双脚一起落，落稳再站”']],
+ up:'跳箱落地 + 立即二次起跳',down:'原地小跳落地，不加高度',
+ assess:'连续 10 次落地，膝盖内扣 0 次、声音明显轻',
+ parent:'会跳还要会落，孩子今天落地能蹲住了，膝盖才不容易疼。',
+ lay:[['C',130,200],['C',190,200],['P',160,230,'A'],['M',160,230,160,190],['M',160,190,160,230]]},
+{id:'d27',name:'二打一快攻',phase:'main',age:['U10'],dur:12,equip:['球'],dim:'团队配合',theme:['团队配合','传球','运球'],
+ points:['持球人推进到罚球线附近，防守人上来再分球','传球给队友后直插篮下，准备接回传或补篮','二打一原则：先吸引、再分球、最后上篮'],
+ errors:[['太早分球，防守人还在篮下','“再带一步，把他吸过来”'],['分球后站着看，不跟进','“传完就冲篮下”']],
+ up:'加一名回防人变成 2v2',down:'无防守跑位 + 传球路线',
+ assess:'10 次二打一成功 ≥7 次，传球时机正确 ≥7 次',
+ parent:'二打一不是“赶紧传”，是先吸引防守再分，孩子今天懂了这一步。',
+ lay:[['P',160,230,'A'],['P',215,200,'B'],['D',175,130,'X'],['A',170,222,205,205],['M',160,230,150,120]]},
+{id:'d28',name:'三打二转二打一',phase:'main',age:['U12'],dur:12,equip:['球'],dim:'团队配合',theme:['团队配合','传球','防守'],
+ points:['三打二时把球推进到一侧，迫使一名防守人上前','分球后立刻变成二打一，弱侧队员补位保持宽度','每次传球后至少一人空切，形成“传—切—补”'],
+ errors:[['三人挤在一条线上，没有宽度','“拉开，一人一边”'],['转成二打一时停顿等防守','“趁他回位前打完”']],
+ up:'连续三个回合不休息（转换进攻）',down:'慢速走位，先跑对路线',
+ assess:'10 个回合得分 ≥6 次，每次进攻 ≤8 秒',
+ parent:'三打二考的是“多打少别浪费”，孩子今天知道要把人吸引过来再分。',
+ lay:[['P',120,230,'A'],['P',160,200,'B'],['P',205,230,'C'],['D',145,140,'X'],['D',190,140,'Y'],['A',130,222,152,208],['M',205,230,200,120]]},
+{id:'d29',name:'半场三对三',phase:'main',age:['U10','U12'],dur:15,equip:['球','号码背心'],dim:'团队配合',theme:['团队配合','防守','投篮'],
+ points:['进攻先拉开三角，一次传球后必须有人空切','防守人盯人不出三秒区，失位立刻换防','每次进攻限 12 秒，24 秒内必须出手'],
+ errors:[['四个人围着球转，没人跑位','“球动人也动”'],['防守全挤在篮下','“一人盯一个，别去看球”']],
+ up:'加“得分后球权转换”连续打',down:'降低对抗强度，允许 4 打 3',
+ assess:'10 分钟比赛，空切 ≥6 次、助攻 ≥3 次',
+ parent:'三对三最练阅读比赛，孩子今天开始知道“传完要动”了。',
+ lay:[['P',110,220,'A'],['P',160,180,'B'],['P',210,220,'C'],['D',120,160,'X'],['D',165,135,'Y'],['D',205,160,'Z'],['A',120,210,155,192]]},
+{id:'d30',name:'全场紧逼与破紧逼',phase:'main',age:['U12'],dur:12,equip:['球','号码背心'],dim:'防守',theme:['防守','团队配合'],
+ points:['紧逼时一人逼球、一人封中线、一人断回传','破紧逼用“接应—回传—再推进”，不运球硬突','发球 5 秒内必须有人接应，接应人主动迎球'],
+ errors:[['全队追着球跑，身后全空','“逼球的人上，其他人看人”'],['接应人站着等球','“迎上去接，别等球来找你”']],
+ up:'5 秒违例判罚，增加压力',down:'半场 3 人紧逼，降低速度',
+ assess:'10 次发球 8 次能在 6 秒内过中线',
+ parent:'紧逼看着凶，其实怕“有人接应”，孩子今天学会了主动迎球。',
+ lay:[['P',160,250,'A'],['P',90,200,'B'],['P',230,200,'C'],['D',170,230,'X'],['D',140,180,'Y'],['A',160,242,105,208]]},
+{id:'d31',name:'界外球 Box 战术',phase:'main',age:['U12'],dur:10,equip:['球'],dim:'团队配合',theme:['团队配合','传球'],
+ points:['四人站成方块（Box），发球人拍球为号','第一选择：底线队员借掩护切篮下；第二选择：高位队员外弹接球','5 秒内没机会就安全回传，不勉强传险球'],
+ errors:[['所有人同时动，路线撞车','“一个一个来，先切再弹”'],['掩护站死、被吹移动掩护','“脚钉住，用身体挡”']],
+ up:'加防守人，要求读出第一机会',down:'无防守跑路线，先记位置',
+ assess:'10 次发球 7 次能形成一次有效出手或空位',
+ parent:'界外球也是战术，孩子今天记住了“先切篮下、再外弹”。',
+ lay:[['P',130,200,'A'],['P',190,200,'B'],['P',130,150,'C'],['P',190,150,'D'],['B',160,245],['A',160,240,140,210],['M',190,150,205,100]]},
+{id:'d32',name:'抢断与回防',phase:'main',age:['U12'],dur:10,equip:['球','号码背心'],dim:'防守',theme:['防守','体能与脚步'],
+ points:['抢断只抢“球暴露”的瞬间，出手后没断到立刻回位','断球失败先退半步再转身，不用手拉人','回防跑直线，先回篮下再找人'],
+ errors:[['赌博式掏球，被过掉','“没把握就别掏，先站住”'],['丢球后原地懊恼，不回防','“丢球先跑，回头再说”']],
+ up:'1v1 抢断失败立即转全场回防',down:'无球练习“掏—退—转身”',
+ assess:'10 次抢断尝试，失位 ≤3 次，回防到位 ≥8 次',
+ parent:'抢断是“有把握才出手”，孩子今天知道了断不到要马上回防。',
+ lay:[['P',160,200,'A'],['D',160,165,'X'],['B',172,206],['M',160,165,160,120],['M',160,120,160,80]]},
+{id:'d33',name:'罚球心理流程',phase:'main',age:['U10'],dur:6,equip:['球'],dim:'投篮',theme:['投篮'],
+ points:['固定流程：拍球 3 次—深呼吸—看筐—出手，每次都一样','呼吸用“吸 4 秒、停 2 秒、呼 4 秒”，把心率降下来','不进也走同一套流程，不临时改动作'],
+ errors:[['罚球前拍球次数随意，节奏乱','“每次都拍三下，固定下来”'],['怕不进、出手太快','“慢一点，先把气呼完”']],
+ up:'加计时/观众干扰下罚球',down:'无球做流程 + 近距离投篮',
+ assess:'连续 10 次罚球流程完整率 100%，命中 ≥4 球',
+ parent:'罚球比的是谁更“稳”，孩子今天有了自己的固定流程。',
+ lay:[['P',160,150,'A'],['B',172,156],['C',160,120],['M',160,150,160,125]]},
+{id:'d34',name:'放松：静态拉伸与呼吸',phase:'cool',age:['U8','U10','U12'],dur:8,equip:[],dim:'体能与脚步',theme:['综合','体能与脚步','运球','传球','投篮','防守','团队配合'],
+ points:['小腿、股四头肌、髋屈肌、肩背各静态拉伸 20–30 秒，不弹震','拉伸时呼吸放慢，呼气时再加深一点幅度','最后围圈说一句“今天最开心的一球”，情绪收尾'],
+ errors:[['拉伸弹震、憋气','“慢慢呼气，别上下弹”'],['练完直接坐下玩手机','“先走两圈，再拉伸”']],
+ up:'加泡沫轴放松（如有）',down:'只做小腿 + 肩背两组',
+ assess:'四个部位各完成 20 秒，呼吸频率明显下降',
+ parent:'练完不收，第二天会酸，孩子今天学会了慢慢呼吸放松。',
+ lay:[['P',110,180,'A'],['P',160,180,'B'],['P',210,180,'C'],['C',160,140]]},
+{id:'d35',name:'投篮命中率挑战赛',phase:'main',age:['U12'],dur:10,equip:['球'],dim:'投篮',theme:['投篮','团队配合'],
+ points:['5 个点各 2 球，记录每点命中，找出最准和最不准的点','比赛压力下保持同一出手节奏，不因落后加快','投完自己报数，队内互相记分'],
+ errors:[['连续不进就改动作','“动作不变，只调力度”'],['只顾快投，不管站位','“先站对，再出手”']],
+ up:'加时间限制与输赢惩罚（折返跑）',down:'只投 3 个点，减少压力',
+ assess:'10 球命中 ≥4 球，5 点命中分布有记录',
+ parent:'比赛型投篮练的是“压力下动作不变形”，孩子今天顶住了。',
+ lay:[['P',100,130,'A'],['P',160,120,'B'],['P',220,130,'C'],['B',172,126],['C',160,100]]},
+{id:'d36',name:'运球追逐游戏（贴人）',phase:'warm',age:['U8'],dur:8,equip:['球'],dim:'运球',theme:['运球','综合'],
+ points:['每人一球，在限定区域内运球，被追到就交换角色','抬头找人、用身体护球，变向躲开追逐者','不许出界、不许双手抱球跑'],
+ errors:[['低头看球被轻松追上','“抬头找空位”'],['一紧张就把球抱起来','“球不许离手，用变向跑”']],
+ up:'缩小区域、增加追逐者',down:'扩大区域、只走不跑',
+ assess:'2 分钟不被抓到 ≥60 秒，出界 ≤1 次',
+ parent:'孩子以为在玩，其实在练抬头运球和变向，今天玩得很投入。',
+ lay:[['P',120,200,'A'],['P',200,180,'B'],['P',150,120,'C'],['C',90,160],['C',220,220]]},
+/*D3-幼儿：3–6 岁只玩，单环节 4–5 分钟，不排队形、不做对抗、不纠正投篮姿势 */
+{id:'p01',name:'跟着小球跑（听口令快跑 / 慢跑 / 停）',phase:'warm',age:['PRE'],dur:4,equip:['球'],dim:'体能与脚步',theme:['综合','体能与脚步','运球'],
+ points:['每人抱一个小篮球或软球，听口令跑：快跑、慢跑、停','停的时候两步之内站住，球抱在胸前，不推前面的孩子','跑的区域用标志桶围出来，出圈就自动停下'],
+ errors:[['跑起来就推人、抢球','“各抱各的球，追自己的脚尖”'],['听到停收不住脚','“听到停，两步之内站住”']],
+ up:'加「听数字抱团」：喊几就几个人靠一起',down:'改成快走和慢走',
+ assess:'听到停 6 次里有 5 次能两步站住，全程不出圈',
+ parent:'这个年龄先练「听指令 + 刹车」，比练动作重要，孩子今天能停住了。',
+ lay:[['P',110,205,'A'],['P',160,220,'B'],['P',215,205,'C'],['C',100,165],['C',220,165]]},
+{id:'p02',name:'小动物模仿热身（熊爬 / 青蛙跳 / 企鹅走）',phase:'warm',age:['PRE'],dur:5,equip:[],dim:'体能与脚步',theme:['综合','体能与脚步'],
+ points:['先示范三种走法，孩子跟着做，不要求队形','熊爬双手撑地慢走 5 米，青蛙跳蹲跳 5 次，企鹅走夹球 5 米','每换一种动物中间站直喘口气'],
+ errors:[['一直让孩子排队等','“散开做，谁做完谁举手”'],['动作太难就硬要求标准','“像就行，不像也没关系”']],
+ up:'加「学小狗停一停」的听信号版本',down:'只做熊爬一种',
+ assess:'三种模仿都能做 5 米，中间不需要抱起来',
+ parent:'模仿游戏练的是手脚协调和身体控制，今天孩子三种动物都能走下来了。',
+ lay:[['P',90,210,'A'],['P',150,225,'B'],['P',210,210,'C'],['C',150,170]]},
+{id:'p03',name:'滚球追球（看谁先摸到）',phase:'main',age:['PRE'],dur:5,equip:['球'],dim:'运球',theme:['综合','运球'],
+ points:['两人一组面对面坐下，把球滚给对方，滚直不歪','换成一人在前跑、一人在后追球，摸到球就换人','追球时低头看球没关系，先追到再抬头'],
+ errors:[['球滚歪了就跑开','“滚偏了捡回来，再来一次”'],['追的时候撞人','“绕开人，从空的一边追”']],
+ up:'改成边走边拍一下球再滚',down:'只做面对面滚球',
+ assess:'连续 5 次能把球滚到对方手边，追球能追上 3 次',
+ parent:'滚球追球是运球的起点：先追着球跑，再学拍球，孩子今天追得很起劲。',
+ lay:[['P',110,210,'A'],['P',210,210,'B'],['B',160,213],['M',110,210,160,213]]},
+{id:'p04',name:'抛接软球：接住就笑',phase:'main',age:['PRE'],dur:5,equip:['球'],dim:'传球',theme:['综合','传球'],
+ points:['先用软球，自己往上抛自己接，抛到头顶上方就行','两人互抛，距离 2 米，接不住就去捡，不批评','接到球喊一声「接住啦」，把成功说出来'],
+ errors:[['怕球不敢伸手','“先用手掌捧，不拍”'],['抛得太高接不到','“抛到自己额头那么高”']],
+ up:'加走动抛接',down:'改成近距离下手递球',
+ assess:'自己抛自己接连续 3 次，互抛接到 3 次',
+ parent:'抛接练手眼配合和不怕球，今天孩子敢伸手了，这一步比动作标准更重要。',
+ lay:[['P',120,200,'A'],['P',200,200,'B'],['B',160,190],['A',160,190,160,150]]},
+{id:'p05',name:'标志桶火车：绕行不碰桶',phase:'main',age:['PRE'],dur:4,equip:['球','标志桶'],dim:'运球',theme:['综合','运球'],
+ points:['把小篮球抱在怀里，绕着摆好的标志桶走 S 形','先走，走顺了再换成小碎步跑','谁碰倒桶谁把它扶起来，自己继续'],
+ errors:[['只顾看桶不看前面','“看前面的空地方”'],['碰倒了不敢扶','“扶起来就继续，不批评”']],
+ up:'加一个「球放地上用手推着走」的难度',down:'把桶间距拉大一倍',
+ assess:'绕完一趟碰桶 ≤1 次，能自己扶起来继续',
+ parent:'绕桶是变向的第一步，孩子在玩里学会了控制身体，碰倒了也会自己扶。',
+ lay:[['P',90,220,'A'],['K',110,180],['K',140,150],['K',180,150],['K',215,180],['P',230,215,'B']]},
+{id:'p06',name:'颜色圈圈：听口令跑到圈里',phase:'main',age:['PRE'],dur:5,equip:['标志桶'],dim:'体能与脚步',theme:['综合','体能与脚步'],
+ points:['用标志桶摆 3 个圈，教练喊颜色或数字，孩子跑过去站进圈','一个圈最多站 3 个人，站不进就找下一个圈','听到「回中间」全都回到中间点'],
+ errors:[['抢圈挤倒人','“站不进就换一个圈”'],['听见口令不动','“先跑再想，跑了就对了”']],
+ up:'把圈减少一个，增加商量和换位',down:'只喊颜色，不喊数字',
+ assess:'10 次口令里 8 次能站进圈，没人摔倒',
+ parent:'这是跑动中的反应练习，孩子今天能听口令换位置了，注意力比上节课长。',
+ lay:[['K',100,190],['K',160,150],['K',220,190],['P',160,225,'A'],['P',160,105,'B']]},
+{id:'p07',name:'把球往高处送（不纠正姿势）',phase:'main',age:['PRE'],dur:4,equip:['球'],dim:'投篮',theme:['综合','投篮'],
+ points:['双手把球举过头顶，往高处往上送，不要求手型和出手点','球落下来自己接住，或者掉地上也没关系','站在离篮筐 1–2 米的地方，筐高最低或不设筐，能过就够'],
+ errors:[['教练反复纠正手型','“这个年龄先练往上送，手型以后再说”'],['要求排队一个一个投','“散开各自往上抛”']],
+ up:'换成小篮球往 1.8 米以下的筐上抛',down:'完全不用筐，只往上抛接',
+ assess:'连续 5 次能把球举过头顶往上送，不掉在身后',
+ parent:'这个年龄不练固定投篮姿势，先把「往上送」的发力顺序玩熟，以后上手更快。',
+ lay:[['P',140,200,'A'],['P',180,215,'B'],['B',160,150],['A',160,200,160,155]]},
+{id:'p08',name:'喝水休息 + 坐圈呼吸',phase:'main',age:['PRE'],dur:4,equip:[],dim:'体能与脚步',theme:['综合'],
+ points:['所有人坐到圈里喝水，教练不讲话，让孩子安静 1 分钟','教一次「鼻子吸气、嘴巴慢慢吹」，吹 3 次','喝完问一句「现在还喘吗」，喘就再坐 1 分钟'],
+ errors:[['休息时间被拿去讲动作','“休息就是休息，不讲技术”'],['孩子跑开了不叫回来','“坐圈里，喝完再动”']],
+ up:'加一个「闭眼听声音」的安静游戏',down:'缩短到 2 分钟，只喝水',
+ assess:'能坐着安静喝完水，呼吸 3 次后能正常说话',
+ parent:'休息是课程的一部分，这个年龄的注意力只有几分钟，歇一下后半节才带得动。',
+ lay:[['P',160,190,'A'],['P',130,215,'B'],['P',190,215,'C'],['C',160,215]]},
+{id:'p09',name:'放松：拍拍手 + 深呼吸',phase:'cool',age:['PRE'],dur:4,equip:[],dim:'体能与脚步',theme:['综合','体能与脚步'],
+ points:['站着拍拍手、拍拍腿，把身上的劲抖掉','跟着教练做 3 次慢深呼吸，吸气举手、呼气放手','最后一句今天最开心的事，说完就下课'],
+ errors:[['到点直接宣布下课','“留 3 分钟收尾，孩子才知道课结束了”'],['要求安静站队','“散着站也行，跟着呼吸就好”']],
+ up:'加「学小树站着不动 10 秒」',down:'只做深呼吸 2 次',
+ assess:'能跟着做完 3 次深呼吸，说出今天的一件开心事',
+ parent:'今天孩子玩得开、收得住，最后能安静呼吸，这就是这个年龄该有的样子。',
+ lay:[['P',120,200,'A'],['P',200,200,'B'],['C',160,160]]},
+/* 青少年 13–16：单环节 12–15 分钟，标准篮筐与标准场地，可进半场对抗与基础战术 */
+{id:'j01',name:'动态热身 + 球感（标准 7 号球）',phase:'warm',age:['JUV'],dur:12,equip:['球'],dim:'体能与脚步',theme:['综合','体能与脚步','运球'],
+ points:['关节激活由脚踝到肩，每侧 8 拍；再加速跑 3 组 20 米','用标准 7 号球做绕腰、绕腿、胯下 8 字各 10 圈','最后 2 分钟两人一组双手交替传接，球速由慢到快'],
+ errors:[['直接上来就投篮，跳过激活','“先给关节上油，再踩油门”'],['用小学生的小球热身','“比赛用什么球，热身就用什么球”']],
+ up:'加入跳箱落地缓冲和绳梯两种脚法',down:'去掉加速跑，只做激活和球感',
+ assess:'8 拍逐级激活无停顿，胯下 8 字每侧 10 圈不掉球',
+ parent:'青少年练的是「能上场」的身体准备，热身不做足，对抗里最容易崴脚。',
+ lay:[['P',110,210,'A'],['P',210,210,'B'],['C',160,150],['M',110,210,160,170]]},
+{id:'j02',name:'半场三对三（标准篮筐 3.05 m）',phase:'main',age:['JUV'],dur:15,equip:['球','号码背心'],dim:'团队配合',theme:['综合','团队配合','防守','投篮'],
+ points:['半场三对三，12 分钟不停表，进球后由防守方发球','要求每次进攻至少一次传球，无传球进球不算','防守必须人盯人，先站住人再动手'],
+ errors:[['拿球就单打','“一次传球才开火，这是规则”'],['防守只看球不看人','“人盯人：先找人，再看球”']],
+ up:'加 12 秒进攻时限',down:'改成三对三半速演练',
+ assess:'12 分钟内每次进攻都有传球，轮转不混乱',
+ parent:'半场三对三是青少年最有效的对抗形式，强度可控，又能把技术用出来。',
+ lay:[['P',110,170,'A'],['P',160,150,'B'],['P',210,170,'C'],['D',130,110,'X'],['D',190,110,'Y'],['B',160,60]]},
+{id:'j03',name:'挡拆顺下：基础战术起手式',phase:'main',age:['JUV'],dur:12,equip:['球'],dim:'团队配合',theme:['综合','团队配合','传球'],
+ points:['持球人叫「挡」，掩护人站到防守人侧后方，脚步不动','掩护到位停 1 秒，持球人贴着掩护肩膀过去','掩护人转身顺下要球，接不到就拉开'],
+ errors:[['掩护时推人、移动脚步','“站住不动才叫掩护，动了就是犯规”'],['顺下太早，还没挡就被拆','“数一秒再走”']],
+ up:'加弱侧协防，练第二选择',down:'先徒手走位，不防守',
+ assess:'两人一组 10 次挡拆，8 次掩护站得住、不移动',
+ parent:'挡拆是青少年第一个该学会的战术，先学站住，再学怎么走。',
+ lay:[['P',150,190,'A'],['P',190,170,'B'],['D',165,150,'X'],['A',150,190,140,140],['M',190,170,175,140]]},
+{id:'j04',name:'传切配合：反跑 + 接球上篮',phase:'main',age:['JUV'],dur:15,equip:['球'],dim:'团队配合',theme:['综合','团队配合','传球','投篮'],
+ points:['传球后先向篮下压一步，再反跑拉开接回传','接球时双脚落地，一步上篮，不运球','无球人从底线穿插，传切两路同时给'],
+ errors:[['传完球站着看','“传完就动，压一步再反跑”'],['接球后多拍两下再上','“接球就一步，别多拍”']],
+ up:'加防守人干扰传球线路',down:'去掉防守，只走传切路线',
+ assess:'10 次传切 7 次能形成上篮，无走步',
+ parent:'传切是「不运球也能得分」的办法，青少年学会这个，进攻就不黏球了。',
+ lay:[['P',110,200,'A'],['P',160,185,'B'],['P',205,200,'C'],['B',160,75],['M',110,200,160,150],['A',160,150,160,100]]},
+{id:'j05',name:'2-3 联防站位与轮转',phase:'main',age:['JUV'],dur:12,equip:['球','号码背心'],dim:'防守',theme:['综合','防守','团队配合'],
+ points:['上线两人、下线三人，谁上提谁补位先讲清','球到侧翼，近侧上线出防，下线横移补中间','5 次传球内不许被空切到篮下'],
+ errors:[['全队跟着球跑，中间空','“球动人动，但位置先站住”'],['补位后没人回位','“补完立刻回，别留在原地”']],
+ up:'加进攻方反跑与背切',down:'只做站位，不进攻',
+ assess:'连续 5 次传球轮转不断层，没有被空切得分',
+ parent:'联防不是偷懒，是让五个人一起防守；今天孩子能记住自己该站哪了。',
+ lay:[['D',120,150,'X'],['D',200,150,'Y'],['D',100,100,'U'],['D',160,95,'V'],['D',220,100,'W'],['B',160,55]]},
+{id:'j06',name:'五对五半场对抗（按强度分组）',phase:'main',age:['JUV'],dur:15,equip:['球','号码背心'],dim:'团队配合',theme:['综合','团队配合','体能与脚步'],
+ points:['按体能分两组，强组用全场、弱组用半场','每 5 分钟换一组，中间喝 30 秒水','每组指定一名场上队长负责喊防守'],
+ errors:[['强弱混在一起打，弱的摸不到球','“按水平分组，不是分好坏，是让每个人都有球”'],['对抗后不喝水接着打','“5 分钟必须停，喝水 30 秒”']],
+ up:'加计分和攻防转换规则',down:'改成半场四对四',
+ assess:'每组 15 分钟里每人至少有 3 次触球，无人抽筋',
+ parent:'对抗是青少年最需要的，但要控强度、控时间，分组就是为了让每个人都在场上。',
+ lay:[['P',100,180,'A'],['P',140,160,'B'],['P',180,160,'C'],['P',220,180,'D'],['P',160,205,'E'],['B',160,60]]},
+{id:'j07',name:'急停跳投 + 篮板卡位',phase:'main',age:['JUV'],dur:12,equip:['球'],dim:'投篮',theme:['综合','投篮','防守'],
+ points:['运两下急停，双脚同时落地，垂直起跳出手','出手后落地稳、不前冲，投完立刻转身找人不看球','投篮不中时先卡位再抢板，屁股顶住人'],
+ errors:[['急停时脚一前一后，出手飘','“双脚落地再起，别单脚”'],['投完站着欣赏，不抢板','“投完就转身卡人”']],
+ up:'加防守人贴防后急停',down:'先原地急停不跳投',
+ assess:'10 次急停跳投 ≥4 中，每次投完都能立刻卡位',
+ parent:'急停跳投是青少年的得分武器，卡位是抢板的第一步，两件事一起练。',
+ lay:[['P',160,190,'A'],['D',160,165,'X'],['B',160,75],['A',160,190,160,150]]},
+{id:'j08',name:'静态拉伸 + 战术复盘',phase:'cool',age:['JUV'],dur:8,equip:[],dim:'体能与脚步',theme:['综合','体能与脚步','团队配合'],
+ points:['大腿前后侧、小腿、肩背各拉 20 秒，不弹震','坐圈用 3 分钟复盘：今天挡拆成功几次、被空切几次','每人说一句自己下次要改的地方'],
+ errors:[['拉伸敷衍两下就散','“20 秒数出来，数不完不算”'],['复盘变成批评会','“只说事，不评价人”']],
+ up:'加泡沫轴放松（有器材时）',down:'只做拉伸，复盘放到下节课开头',
+ assess:'每个部位拉满 20 秒，复盘能说出 1 个具体问题',
+ parent:'拉伸和复盘是青少年进步最快的一段，练完知道哪里错了，下次才改得动。',
+ lay:[['P',120,200,'A'],['P',200,200,'B'],['C',160,160]]},
+/* 成人 17+：单环节 12–15 分钟，含体能、对抗与阵地战术，强度更高 */
+{id:'a01',name:'动态热身 + 关节激活（成人强度）',phase:'warm',age:['ADU'],dur:12,equip:['球'],dim:'体能与脚步',theme:['综合','体能与脚步'],
+ points:['慢跑 3 分钟 → 动态拉伸 4 分钟 → 加速跑 3 组 30 米','髋、踝、肩三个部位各做 2 个方向的活动，成人最容易在这三处伤','最后 2 分钟持球变向跑，把心率提到能说话但不想说'],
+ errors:[['热身只走两圈就开打','“成人肌肉弹性差，省热身就是给自己找伤”'],['一上来就全速冲刺','“先中速，最后 2 组再提速”']],
+ up:'加入跳跃落地缓冲和核心激活',down:'缩短到 8 分钟，只做激活',
+ assess:'三处关节两个方向都做完，加速跑 3 组后呼吸微喘',
+ parent:'成人打球最容易输在热身，这 12 分钟是给自己买的保险。',
+ lay:[['P',110,215,'A'],['P',210,215,'B'],['C',160,150],['M',110,215,160,175]]},
+{id:'a02',name:'全场五对五对抗（标准场地）',phase:'main',age:['ADU'],dur:15,equip:['球','号码背心'],dim:'团队配合',theme:['综合','团队配合','防守','体能与脚步'],
+ points:['全场五对五，分 3 组轮换，每 5 分钟换一组','允许合理身体接触，明确不许的动作：推人、拉手、垫脚','每次进攻必须有人喊一次掩护或传切，不许五人站着看'],
+ errors:[['换人靠喊，场上节奏断了','“死球才换，或者场边举手示意”'],['对抗上火就下手','“火气上来先下场喝口水，这是我们队的规矩”']],
+ up:'加 24 秒进攻时限',down:'改成半场五对五，减少折返',
+ assess:'15 分钟内无冲突、每组都完成 3 次以上战术配合',
+ parent:'成人对抗要有强度，但更要有规矩，伤了谁都不划算。',
+ lay:[['P',100,185,'A'],['P',140,160,'B'],['P',180,160,'C'],['P',220,185,'D'],['P',160,210,'E'],['D',120,110,'X'],['D',200,110,'Y'],['B',160,60]]},
+{id:'a03',name:'挡拆的三种防法：强延误 / 换防 / 绕过',phase:'main',age:['ADU'],dur:12,equip:['球'],dim:'团队配合',theme:['综合','团队配合','防守'],
+ points:['先讲三种防法的站位：大个上提延误、直接换防、从掩护下方绕过','每种防法各做 6 次，进攻方要读出来选：延误就快下、换防就打小打大、绕过就投','防守方喊出来，让全队知道用什么防法'],
+ errors:[['换防不喊，撞在一起','“换防必须喊「换」”'],['延误完不回位，篮下空','“延误一下立刻回”']],
+ up:'加弱侧补防和第二次挡拆',down:'只练强延误一种，不换防',
+ assess:'三种防法各做 6 次，进攻方能说清该选哪种打法',
+ parent:'挡拆不是套路，是判断题；三种防法都见过，场上才不慌。',
+ lay:[['P',150,195,'A'],['P',195,170,'B'],['D',165,150,'X'],['D',190,140,'Y'],['A',150,195,130,140]]},
+{id:'a04',name:'体能：折返冲刺 + 滑步 + 抗阻跑',phase:'main',age:['ADU'],dur:15,equip:['标志桶'],dim:'体能与脚步',theme:['体能与脚步','防守'],
+ points:['底线到底线折返 17 趟一组，做 2 组，组间歇 90 秒','防守滑步左右各 15 米 ×2，手不交叉、屁股不抬高','抗阻跑：同伴用弹力带或手拉，10 米 ×4'],
+ errors:[['只跑步不练滑步','“折返练心肺，滑步练防守，两码事”'],['组间不敢歇，硬撑','“歇够 90 秒，下一组质量才高”']],
+ up:'加计时记录，两周后对比',down:'折返减到 11 趟，滑步减半',
+ assess:'17 趟折返 2 组能完成，滑步全程屁股不上下起伏',
+ parent:'成人比的是谁下半场还跑得动，这 15 分钟决定最后五分钟。',
+ lay:[['K',80,230],['K',160,230],['K',240,230],['P',160,200,'A'],['A',160,200,160,120]]},
+{id:'a05',name:'半场紧逼与破紧逼',phase:'main',age:['ADU'],dur:12,equip:['球','号码背心'],dim:'防守',theme:['综合','防守','团队配合'],
+ points:['紧逼：一人贴球、一人封中路、第三人断回传','破紧逼：接球前先反跑，接球后第一时间找中场人','不许运球过中线，先传再跑'],
+ errors:[['紧逼时全队上抢，身后全空','“上去一个，剩下的守住位置”'],['破紧逼时全站着等球','“反跑要球，别当观众”']],
+ up:'加 8 秒过半场时限',down:'改成半速走位',
+ assess:'紧逼 5 次能造成 2 次失误，破紧逼 8 秒内过半场',
+ parent:'紧逼是成年队最好用的武器，破紧逼是最该练的基本功。',
+ lay:[['D',120,180,'X'],['D',160,170,'Y'],['D',200,180,'Z'],['P',140,215,'A'],['P',180,215,'B'],['B',160,60]]},
+{id:'a06',name:'阵地进攻：牛角站位',phase:'main',age:['ADU'],dur:15,equip:['球'],dim:'团队配合',theme:['综合','团队配合','传球'],
+ points:['球在弧顶，两名内线分站两侧肘区，形成「牛角」','三个选择：内线顺下、外线绕掩护投篮、底线空切','每次进攻至少两次传球，最后 8 秒才允许单打'],
+ errors:[['两个人挤在同侧肘区','“一人一边，中间留出通道”'],['传球太多不敢出手','“最后 8 秒是出手时间，别再传”']],
+ up:'加防守方自由选择防法',down:'先不防守，只走位和传球',
+ assess:'10 次进攻有 6 次跑出三个选择中的至少一个',
+ parent:'牛角是最简单的阵地起手式，站对了位置，机会自己会出来。',
+ lay:[['P',160,215,'A'],['P',120,165,'B'],['P',200,165,'C'],['P',110,225,'D'],['P',210,225,'E'],['B',160,60]]},
+{id:'a07',name:'对抗上篮 + 罚球（允许身体接触）',phase:'main',age:['ADU'],dur:12,equip:['球'],dim:'投篮',theme:['综合','投篮','防守'],
+ points:['一人持球突破，防守人用身体顶住，上篮必须打进或造犯规','落地要稳，先保护自己再想进球','每轮 5 次上篮后罚 2 球，罚球时全队不许说话'],
+ errors:[['怕接触，躲着上篮','“顶住了再起，别横着飞”'],['罚球前还在聊天','“罚球是专注练习，安静两秒”']],
+ up:'加计时：10 秒内完成一次突破上篮',down:'去掉防守，只做上篮和罚球',
+ assess:'5 次对抗上篮 ≥3 中，罚球 10 中 6',
+ parent:'成人比赛的身体接触是常态，练过对抗上篮，比赛里才不会一碰就变形。',
+ lay:[['P',150,200,'A'],['D',150,180,'X'],['B',160,75],['A',150,200,150,150]]},
+{id:'a08',name:'拉伸 + 呼吸恢复（成人恢复）',phase:'cool',age:['ADU'],dur:8,equip:[],dim:'体能与脚步',theme:['综合','体能与脚步'],
+ points:['大腿前后侧、小腿、臀、肩各拉 30 秒，成人比孩子需要更久','躺下做 5 次腹式呼吸，把手放在肚子上感觉起伏','喝点水，今天哪里紧，明天就多拉哪里'],
+ errors:[['拉伸 1 分钟就洗澡走人','“30 秒一个部位，少一个明天就酸”'],['呼吸太急','“吸 4 秒、呼 6 秒”']],
+ up:'加泡沫轴放松大腿外侧',down:'只做下肢四个部位',
+ assess:'每个部位拉满 30 秒，呼吸 5 次后心率明显下降',
+ parent:'成人恢复做不做，直接决定明天能不能正常下楼，别省这 8 分钟。',
+ lay:[['P',120,200,'A'],['P',200,200,'B'],['C',160,160]]},
+/*D3*/
+];
+/* ---------- 年龄 / 器材 / 场地规则（数值只留能引出原文的 U8/U10/U12） ---------- */
+const RULES = [
+  {age:'PRE', ball:'3 号小篮球或软球', hoop:'不设，或用最低档的小篮架', court:'半场一角够用，12 × 7 m 以内', ft:'不计罚球和三分，先把跑跳与手眼玩顺', quote:''},
+  {age:'U8',  ball:'4 号球（周长 62–66 cm，重 430–460 g）', hoop:'2.35 m（7–8 岁）；幼儿园 1.80 m 以下', court:'28 × 15 m（26 × 14 至 12 × 7 m 可缩）', ft:'罚球线距篮板 4 m；无三分线', quote:'第2条：球场尺寸可以根据当地设施而调整，标准的尺寸为长28米、宽15米。尺寸可以根据场地实际情况按比例缩减，在26米×14米到12米×7米的相同比例下变化。第3条：罚球线距篮板是4米。没有3分投篮线和区域。第4条：7~8岁，相应距离为2.35米。幼儿园的孩子可以采用更低的球篮（1.80米以下）。8岁和8岁以下的孩子们应使用4号球，球周长为62~66厘米并且重量在430~460克。'},
+  {age:'U10', ball:'5 号球（周长 69–71 cm，重 470–500 g）', hoop:'2.60 m', court:'28 × 15 m（26 × 14 至 12 × 7 m 可缩）', ft:'罚球线距篮板 4 m；无三分线', quote:'第4条：9~10岁，相应距离为2.60米。9~12岁的孩子们应使用5号球，球周长为69~71厘米并且重量在470~500克。第2条：球场尺寸可以根据当地设施而调整，标准的尺寸为长28米、宽15米。第3条：罚球线距篮板是4米。没有3分投篮线和区域。'},
+  {age:'U12', ball:'5 号球（周长 69–71 cm，重 470–500 g）', hoop:'2.75 m', court:'28 × 15 m（26 × 14 至 12 × 7 m 可缩）', ft:'罚球线距篮板 4 m；无三分线', quote:'第4条：11~12岁，球篮的高度距离地板2.75米。9~12岁的孩子们应使用5号球，球周长为69~71厘米并且重量在470~500克。第2条：球场尺寸可以根据当地设施而调整，标准的尺寸为长28米、宽15米。第3条：罚球线距篮板是4米。没有3分投篮线和区域。'},
+  {age:'JUV', ball:'6 号球（女子）/ 7 号球（男子）', hoop:'3.05 m（标准篮筐）', court:'标准 28 × 15 m 全场', ft:'标准场地：罚球线 4.60 m、三分线 6.75 m', quote:''},
+  {age:'ADU', ball:'7 号球（女子用 6 号球）', hoop:'3.05 m（标准篮筐）', court:'标准 28 × 15 m 全场', ft:'标准场地：罚球线 4.60 m、三分线 6.75 m', quote:''}
+];
+/* 六档：幼儿 3–6、U8、U10、U12、青少年 13–16、成人 17+。MIX 只覆盖 U8–U12，行为不动。 */
+const AGES = ['PRE','U8','U10','U12','JUV','ADU'];
+const MIX_AGES = ['U8','U10','U12'];
+const AGE_LABEL = {PRE:'幼儿', U8:'U8', U10:'U10', U12:'U12', JUV:'青少年', ADU:'成人', MIX:'混龄'};
+const AGE_FULL = {PRE:'幼儿 3–6 岁', U8:'U8（7–8 岁）', U10:'U10（9–10 岁）', U12:'U12（11–12 岁）',
+  JUV:'青少年 13–16 岁', ADU:'成人 17+'};
+function ageShort(a){ return AGE_LABEL[a] || a; }
+const AGE_IDS = AGES.concat(['MIX']);
+
+const THEMES = ['综合','运球','传球','投篮','防守','体能与脚步','团队配合'];
+const ALL_EQUIP = ['球','标志桶','绳梯','号码背心'];
+
+function validateDrill(d){
+  const bad=[];
+  ['id','name','phase','dim'].forEach(k=>{ if(!d[k]) bad.push('缺字段 '+k); });
+  if(!Array.isArray(d.age)||!d.age.length||d.age.some(a=>!AGES.includes(a))) bad.push('年龄段不合法');
+  if(!(d.dur>=4&&d.dur<=20)) bad.push('时长越界');
+  if(!Array.isArray(d.equip)) bad.push('器材不是数组');
+  if(!Array.isArray(d.points)||d.points.length!==3) bad.push('技术要点必须 3 条');
+  if(!Array.isArray(d.errors)||d.errors.length<2) bad.push('常见错误少于 2 条');
+  else d.errors.forEach(e=>{ if(!Array.isArray(e)||e.length!==2||!e[0]||!e[1]) bad.push('错误/口令格式错'); });
+  ['up','down','assess','parent'].forEach(k=>{ if(!d[k]||String(d[k]).length<4) bad.push('缺 '+k); });
+  if(!Array.isArray(d.lay)||!d.lay.length) bad.push('缺布阵图数据');
+  if(!Array.isArray(d.theme)||!d.theme.length) bad.push('缺主题标签');
+  return bad;
+}
+
+function hasEquip(d, owned){
+  owned = owned && owned.length ? owned : ['球','标志桶'];
+  return d.equip.every(e=> owned.includes(e));
+}
+function ageMatch(d, ages){ return d.age.some(a=>ages.includes(a)); }
+
+/* ---------- 场地条件：无筐 / 小空间过滤 ---------- */
+/* 只列“动作本身离不开篮筐/篮板”的环节；无筐时全部剔除，避免换名不换内容。 */
+const NO_HOOP_IDS = ['d12','d13','d14','d15','d16','d17','d18','d22','d27','d28','d29','d33','d35'];
+/* 只列“需要全场长度或长距离冲刺”的环节；半场/小空间时剔除。 */
+const NO_FULL_IDS = ['d12','d24','d27','d28','d30','d32'];
+const SITE_ALT_IDS = {U8:['d01','d03','d34'], U10:['d01','d05','d34'], U12:['d01','d07','d34'], MIX:['d01','d03','d34']};
+
+function normSite(site){
+  site = site || {};
+  return {
+    place: site.place==='out' ? 'out' : 'in',
+    hoop: site.hoop==='no' ? 'no' : 'yes',
+    court: site.court==='full' ? 'full' : site.court==='half' ? 'half' : 'any',
+    tight: site.tight===true || site.tight===1 || site.tight==='1' || site.tight==='true'
+  };
+}
+function siteActive(site){
+  const s=normSite(site);
+  return s.hoop==='no' || s.tight || s.court==='half';
+}
+function siteLabel(site){
+  const s=normSite(site);
+  return (s.place==='out'?'室外':'室内')+' · '+(s.hoop==='no'?'无篮筐':'有篮筐')+' · '+
+    (s.tight?'空间不足半场':(s.court==='full'?'全场':s.court==='half'?'半场':'场地不限'));
+}
+function drillSiteIssue(d, site){
+  const s=normSite(site);
+  if(s.hoop==='no' && NO_HOOP_IDS.includes(d.id)) return '无篮筐：投篮/上篮类练习已跳过';
+  if(NO_FULL_IDS.includes(d.id)){
+    if(s.tight) return '空间不足半场：全场折返/长距离冲刺类练习已跳过';
+    if(s.court==='half') return '半场：全场折返/长距离冲刺类练习已跳过';
+  }
+  return '';
+}
+/* 极端情况（条件+轮换把池子清空）才用的安全清单：无筐、半场、按年龄选一个主课。 */
+function siteAltBlocks(age, duration, owned){
+  const ids=SITE_ALT_IDS[age]||SITE_ALT_IDS.U10;
+  const ds=ids.map(id=>DRILLS.find(d=>d.id===id)).filter(Boolean)
+    .filter(d=>!drillSiteIssue(d,{hoop:'no',tight:true}) && hasEquip(d,owned));
+  const warmD=ds.find(d=>d.phase==='warm'), mainD=ds.find(d=>d.phase==='main'), coolD=ds.find(d=>d.phase==='cool');
+  const wMin=warmD?Math.max(4,Math.min(12,Math.round(duration*0.15))):0;
+  const cMin=coolD?Math.max(4,Math.min(12,Math.round(duration*0.10))):0;
+  const mMin=Math.max(4,duration-wMin-cMin);
+  const out=[];
+  if(warmD) out.push({d:warmD, minutes:wMin, phase:'warm', sets:1});
+  if(mainD) out.push({d:mainD, minutes:mMin, phase:'main', sets:Math.max(1,Math.ceil(mMin/Math.max(4,mainD.dur)))});
+  if(coolD) out.push({d:coolD, minutes:cMin, phase:'cool', sets:1});
+  if(out.length){
+    const sum=out.reduce((s,b)=>s+b.minutes,0);
+    if(sum!==duration) out[out.length-1].minutes=Math.max(4,out[out.length-1].minutes+(duration-sum));
+  }
+  return out;
+}
+function drillCost(d, theme, level){
+  let c = 0;
+  if(theme && theme!=='综合'){
+    if(d.dim===theme) c -= 6; else if(d.theme.includes(theme)) c -= 3; else c += 2;
+  }
+  if(level===1 && d.age.length>1) c += 1;
+  if(level===3 && d.age.length===1 && d.age[0]==='U8') c += 1;
+  return c;
+}
+
+function pickPhaseBlock(list, target, phase){
+  const cand = list.filter(d=>d.phase===phase);
+  if(!cand.length) return null;
+  let best=null, bd=1e9;
+  cand.forEach(d=>{ const diff=Math.abs(d.dur-target); if(diff<bd){ bd=diff; best=d; } });
+  const minutes = Math.max(4, Math.min(12, target));
+  return {drill:best, minutes:minutes};
+}
+
+function pickMain(list, target, theme, level){
+  const items=[];
+  list.filter(d=>d.phase==='main').forEach(d=>{ items.push(d); items.push(d); });
+  const best = new Map(); best.set(0,{cost:0,picks:[]});
+  for(const d of items){
+    const snap = Array.from(best.entries());
+    for(const [sum,st] of snap){
+      const ns = sum + d.dur;
+      if(ns>target) continue;
+      const dup = st.picks.filter(p=>p.id===d.id).length;
+      const cost = st.cost + drillCost(d,theme,level) + dup*5;
+      const cur = best.get(ns);
+      if(!cur || cost<cur.cost) best.set(ns,{cost:cost,picks:st.picks.concat([d])});
+    }
+  }
+  if(best.has(target)) return {picks:best.get(target).picks, exact:true};
+  let bestSum=0;
+  for(const k of best.keys()) if(k<=target && k>bestSum) bestSum=k;
+  return {picks:best.get(bestSum).picks, exact:false, short:target-bestSum};
+}
+
+/* ---------- 分档排课（#191）：幼儿 3–6 岁、青少年 13–16、成人 17+ ---------- */
+/* 幼儿 / 青少年 / 成人各自的环节时长规则和自己的课总时长绑在一起，不能靠老路径「把零头全塞最后一个环节」。 */
+const BAND = {
+  PRE:{key:'PRE', name:'幼儿', minBlock:4, maxBlock:5, warmMin:4, coolMin:4, restMin:4, minDur:30, maxDur:40,
+    note:'单环节 4–5 分钟、整堂课 30–40 分钟，中间必须喝水休息；只玩，不排队形、不做对抗、不纠正固定投篮姿势；器材只用软球 / 小篮球、标志桶和圈。'},
+  JUV:{key:'JUV', name:'青少年', minBlock:12, maxBlock:15, warmMin:12, coolMin:8,
+    note:'单环节 12–15 分钟；标准 3.05 m 篮筐、标准场地、6 / 7 号球，含半场对抗与基础战术（挡拆、传切、联防）。'},
+  ADU:{key:'ADU', name:'成人', minBlock:12, maxBlock:15, warmMin:12, coolMin:8,
+    note:'单环节 12–15 分钟；标准场地与成人用球，含体能、身体接触和阵地战术，强度高于青少年档，热身和放松不能省。'}
+};
+const REST_DRILL_ID = 'p08';
+
+function splitExact(total, lo, hi){
+  if(total <= 0) return null;
+  const n0 = Math.max(1, Math.ceil(total/hi));
+  for(let n=n0; n<=n0+8; n++){
+    const base = Math.floor(total/n), rem = total % n;
+    if(base >= lo && base + (rem>0?1:0) <= hi){
+      return Array.from({length:n}, (_,i)=> base + (i<rem?1:0));
+    }
+  }
+  return null;
+}
+function bandLayout(B, duration){
+  const rest = B.restMin || 0;
+  for(let warm=B.warmMin; warm>=4; warm--){
+    for(let cool=B.coolMin; cool>=4; cool--){
+      const mainT = duration - warm - cool - rest;
+      const parts = splitExact(mainT, B.minBlock, B.maxBlock);
+      if(parts) return {warm:warm, cool:cool, rest:rest, main:parts, ok:true};
+    }
+  }
+  /* 短课兜底：热身放松压到最短，主课留一段，总时长仍然精确 */
+  const warm = Math.max(4, Math.min(B.warmMin, duration-8));
+  const cool = Math.max(4, Math.min(B.coolMin, duration-warm-4));
+  const keepRest = rest && (duration - warm - cool - rest) >= 4 ? rest : 0;
+  const mainT = Math.max(4, duration - warm - cool - keepRest);
+  return {warm:warm, cool:cool, rest:keepRest, main:[mainT], ok:false};
+}
+function bandPicks(list, n, theme, level){
+  const order = list.slice().sort((a,b)=>{
+    const ca = drillCost(a, theme, level), cb = drillCost(b, theme, level);
+    return ca-cb || String(a.id).localeCompare(String(b.id));
+  });
+  const out = [];
+  for(let i=0;i<n;i++) out.push(order[i % order.length]);
+  return out;
+}
+function buildBandLesson(cfg, B){
+  cfg = cfg || {};
+  const age = B.key;
+  let duration = Math.max(20, Math.min(150, Math.round(cfg.duration||60)));
+  const clamped = (B.minDur && duration < B.minDur) || (B.maxDur && duration > B.maxDur);
+  if(B.minDur) duration = Math.max(B.minDur, duration);
+  if(B.maxDur) duration = Math.min(B.maxDur, duration);
+  const theme = cfg.theme || '综合';
+  const level = cfg.level || 2;
+  const players = Math.max(4, Math.min(40, Math.round(cfg.players||12)));
+  const owned = (cfg.equip && cfg.equip.length) ? cfg.equip : ['球','标志桶'];
+  const site = normSite(cfg.site);
+  const siteSkipped = [];
+  const pool = DRILLS.filter(d=> ageMatch(d,[age]) && hasEquip(d, owned)).filter(d=>{
+    const reason = drillSiteIssue(d, site);
+    if(reason){ siteSkipped.push({id:d.id, name:d.name, reason:reason}); return false; }
+    return true;
+  });
+  const excluded = new Set((cfg.excludeIds||[]).map(String));
+  const fresh = list=> list.filter(d=>!excluded.has(d.id));
+  const mainPool = fresh(pool.filter(d=>d.phase==='main' && d.id!==REST_DRILL_ID));
+  if(!mainPool.length) return null;
+  const warmPool = fresh(pool.filter(d=>d.phase==='warm'));
+  const coolPool = fresh(pool.filter(d=>d.phase==='cool'));
+  const lay = bandLayout(B, duration);
+  const mainDrills = bandPicks(mainPool, lay.main.length, theme, level);
+  const warmDrill = warmPool[0] || null;
+  const coolDrill = coolPool[0] || null;
+  const warmMin = warmDrill ? lay.warm : 0;
+  const coolMin = coolDrill ? lay.cool : 0;
+  const blocks = [];
+  if(warmDrill) blocks.push({d:warmDrill, minutes:warmMin, phase:'warm', sets:1});
+  const restDrill = lay.rest ? DRILLS.find(d=>d.id===REST_DRILL_ID) : null;
+  const restAt = restDrill ? Math.ceil(mainDrills.length/2) : -1;
+  mainDrills.forEach((d,i)=>{
+    if(i===restAt) blocks.push({d:restDrill, minutes:lay.rest, phase:'main', sets:1, rest:true});
+    blocks.push({d:d, minutes:lay.main[i], phase:'main', sets:Math.max(1, Math.ceil(players/8))});
+  });
+  if(restDrill && restAt>=mainDrills.length) blocks.push({d:restDrill, minutes:lay.rest, phase:'main', sets:1, rest:true});
+  if(coolDrill) blocks.push({d:coolDrill, minutes:coolMin, phase:'cool', sets:1});
+  const total = blocks.reduce((s,b)=>s+b.minutes,0);
+  const sections = {warm:[], main:[], cool:[]};
+  blocks.forEach(b=> sections[b.phase].push(b));
+  const equipUsed = Array.from(new Set(blocks.flatMap(b=>b.d.equip)));
+  const reusedIds = Array.from(new Set(blocks.filter(b=>excluded.has(b.d.id)).map(b=>b.d.id)));
+  let note = B.note;
+  if(clamped) note += '（本次按 '+duration+' 分钟排：'+(duration>=B.minDur?'幼儿档整堂课 30–40 分钟，超过 40 分钟的部分已收掉':'幼儿档整堂课至少 30 分钟，已补足')+'）';
+  return {
+    cfg:{age:age, theme:theme, duration:duration, players:players, level:level, equip:owned, site:site},
+    blocks:blocks, warm:sections.warm, main:sections.main, cool:sections.cool,
+    total:total, players:players, equipUsed:equipUsed, excludedIds:Array.from(excluded),
+    reused:reusedIds.length>0, reusedIds:reusedIds,
+    site:site, siteSkipped:siteSkipped, siteFallback:false,
+    band:B.name, bandNote:note, exact: total===duration
+  };
+}
+
+function buildLesson(cfg){
+  cfg = cfg || {};
+  const duration = Math.max(20, Math.min(150, Math.round(cfg.duration||60)));
+  const age = cfg.age || 'U10';
+  if(BAND[age]){
+    const bandLesson = buildBandLesson(cfg, BAND[age]);
+    if(bandLesson) return bandLesson;
+  }
+  const ages = age==='MIX' ? MIX_AGES.slice() : [age];
+  const theme = cfg.theme || '综合';
+  const level = cfg.level || 2;
+  const players = Math.max(4, Math.min(40, Math.round(cfg.players||12)));
+  const owned = (cfg.equip && cfg.equip.length) ? cfg.equip : ['球','标志桶'];
+  const site = normSite(cfg.site);
+
+  const basePool = DRILLS.filter(d=> ageMatch(d,ages) && hasEquip(d,owned));
+  const siteSkipped = [];
+  const pool = basePool.filter(d=>{
+    const reason = drillSiteIssue(d, site);
+    if(reason){ siteSkipped.push({id:d.id, name:d.name, reason:reason}); return false; }
+    return true;
+  });
+  const excluded = new Set((cfg.excludeIds||[]).map(String));
+  const fresh = list=> list.filter(d=>!excluded.has(d.id));
+  const warmList = pool.filter(d=>d.phase==='warm');
+  const coolList = pool.filter(d=>d.phase==='cool');
+  const mainList = pool.filter(d=>d.phase==='main');
+  let warm = pickPhaseBlock(fresh(warmList), Math.round(duration*0.15), 'warm');
+  if(!warm && excluded.size) warm = pickPhaseBlock(warmList, Math.round(duration*0.15), 'warm');
+  let cool = pickPhaseBlock(fresh(coolList), Math.round(duration*0.10), 'cool');
+  if(!cool && excluded.size) cool = pickPhaseBlock(coolList, Math.round(duration*0.10), 'cool');
+  const warmMin = warm ? warm.minutes : 0;
+  const coolMin = cool ? cool.minutes : 0;
+  let mainT = duration - warmMin - coolMin;
+  if(mainT < 8){ mainT = 8; }
+
+  let mainPick = pickMain(fresh(mainList), mainT, theme, level);
+  if(excluded.size && !mainPick.exact){
+    const alt = pickMain(mainList, mainT, theme, level);
+    if(alt.exact) mainPick = alt;
+  }
+  let blocks = [];
+  if(warm) blocks.push({d:warm.drill, minutes:warmMin, phase:'warm', sets:1});
+  mainPick.picks.forEach(d=>{
+    blocks.push({d:d, minutes:d.dur, phase:'main', sets:Math.max(1, Math.ceil(players/8))});
+  });
+  if(cool) blocks.push({d:cool.drill, minutes:coolMin, phase:'cool', sets:1});
+
+  /* 条件过滤后主课池为空（或整池被轮换排除）时，换成无筐/半场安全替代，绝不交空课。 */
+  let siteFallback = false;
+  if(siteActive(site) && !blocks.some(b=>b.phase==='main')){
+    const alt = siteAltBlocks(age, duration, owned);
+    if(alt.length){ blocks = alt; siteFallback = true; }
+  }
+
+  let total = blocks.reduce((s,b)=>s+b.minutes,0);
+  if(total !== duration){
+    const diff = duration - total;
+    if(blocks.length){
+      const last = blocks[blocks.length-1];
+      last.minutes = Math.max(4, last.minutes + diff);
+      total = blocks.reduce((s,b)=>s+b.minutes,0);
+    }
+  }
+  const equipUsed = Array.from(new Set(blocks.flatMap(b=>b.d.equip)));
+  const reusedIds = siteFallback ? [] : Array.from(new Set(blocks.filter(b=>excluded.has(b.d.id)).map(b=>b.d.id)));
+  const sections = {warm:[], main:[], cool:[]};
+  blocks.forEach(b=> sections[b.phase].push(b));
+  return {
+    cfg:{age:age, theme:theme, duration:duration, players:players, level:level, equip:owned, site:site},
+    blocks:blocks, warm:sections.warm, main:sections.main, cool:sections.cool,
+    total:total, players:players, equipUsed:equipUsed, excludedIds:Array.from(excluded),
+    reused:reusedIds.length>0, reusedIds:reusedIds,
+    site:site, siteSkipped:siteSkipped, siteFallback:siteFallback,
+    exact: total===duration && mainPick.exact && !siteFallback
+  };
+}
+
+function fmtClock(sec){
+  sec = Math.max(0, Math.round(sec));
+  const m = Math.floor(sec/60), s = sec%60;
+  return (m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+}
+function timerMeta(blocks, i, left){
+  const list=Array.isArray(blocks)?blocks:[];
+  const n=list.length;
+  if(!n) return {i:0,count:0,step:0,left:0,totalLeft:0,clock:'00:00',totalClock:'00:00',
+    progress:0,name:'',minutes:0,phase:''};
+  const raw=Math.round(Number(i));
+  const idx=Math.max(0,Math.min(n-1,Number.isFinite(raw)?raw:0));
+  const cur=list[idx]||{};
+  const full=Math.max(0,Math.round(Number(cur.minutes)*60||0));
+  const rawLeft=Math.max(0,Math.round(Number(left)||0));
+  const l=full?Math.min(full,rawLeft):0;
+  const totalLeft=l+list.slice(idx+1).reduce((s,b)=>s+Math.max(0,Math.round(Number(b&&b.minutes)*60||0)),0);
+  return {i:idx,count:n,step:idx+1,left:l,totalLeft:totalLeft,
+    clock:fmtClock(l),totalClock:fmtClock(totalLeft),
+    progress:full?Math.max(0,Math.min(100,(full-l)/full*100)):0,
+    name:cur.name||'',minutes:Number(cur.minutes)||0,phase:cur.phase||''};
+}
+function phaseName(p){ return p==='warm'?'热身':p==='main'?'主课':'放松'; }
+
+/* ---------- SVG 半场布阵图 ---------- */
+function svgDiagram(lay, opts){
+  opts = opts || {};
+  const W=320, H=300, L=22, R=298, T=22, B=284, CX=160, CY=36;
+  const parts=[];
+  parts.push('<rect x="0" y="0" width="320" height="300" fill="#0b0e13"/>');
+  parts.push('<path d="M'+L+','+T+' L'+R+','+T+' L'+R+','+B+' L'+L+','+B+' Z" fill="none" stroke="#39414f" stroke-width="1.4"/>');
+  parts.push('<path d="M'+L+','+B+' L'+R+','+B+'" stroke="#39414f" stroke-width="1.4"/>');
+  parts.push('<path d="M118,'+T+' L118,112 L202,112 L202,'+T+'" fill="none" stroke="#39414f" stroke-width="1.2"/>');
+  parts.push('<circle cx="160" cy="112" r="26" fill="none" stroke="#39414f" stroke-width="1.2"/>');
+  parts.push('<path d="M'+L+','+T+' L'+L+',74 A 148,148 0 0 1 '+R+',74 L'+R+','+T+'" fill="none" stroke="#39414f" stroke-width="1.2" stroke-dasharray="1 0"/>');
+  parts.push('<path d="M'+L+','+T+' L'+L+',74" stroke="#39414f" stroke-width="1.2"/>');
+  parts.push('<path d="M'+R+','+T+' L'+R+',74" stroke="#39414f" stroke-width="1.2"/>');
+  parts.push('<line x1="145" y1="30" x2="175" y2="30" stroke="#cfd6e2" stroke-width="2.4"/>');
+  parts.push('<circle cx="160" cy="38" r="6.5" fill="none" stroke="#ff7a18" stroke-width="2.2"/>');
+  parts.push('<path d="M154,38 L166,38 M160,32 L160,44" stroke="#ff7a18" stroke-width="1" opacity=".7"/>');
+
+  const arrow=(x1,y1,x2,y2,color,dash,curve)=>{
+    const ang=Math.atan2(y2-y1,x2-x1), a=7;
+    const p1=x2-a*Math.cos(ang-0.42), q1=y2-a*Math.sin(ang-0.42);
+    const p2=x2-a*Math.cos(ang+0.42), q2=y2-a*Math.sin(ang+0.42);
+    const d = dash?' stroke-dasharray="5 4"':'';
+    return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+color+'" stroke-width="1.8"'+d+'/>'+
+           '<polygon points="'+x2+','+y2+' '+p1.toFixed(1)+','+q1.toFixed(1)+' '+p2.toFixed(1)+','+q2.toFixed(1)+'" fill="'+color+'"/>';
+  };
+
+  (lay||[]).forEach(function(it){
+    const k=it[0];
+    if(k==='P'||k==='D'){
+      const col = k==='P' ? '#4aa8ff' : '#ff5d5d';
+      const tx = k==='P' ? '#06121f' : '#2a0707';
+      parts.push('<circle cx="'+it[1]+'" cy="'+it[2]+'" r="9.5" fill="'+col+'" stroke="#0b0e13" stroke-width="1.5"/>');
+      parts.push('<text x="'+it[1]+'" y="'+(it[2]+3.6)+'" font-size="9" font-weight="700" fill="'+tx+'" text-anchor="middle" font-family="sans-serif">'+(it[3]||'')+'</text>');
+    } else if(k==='C'){
+      parts.push('<polygon points="'+it[1]+','+(it[2]-7)+' '+(it[1]-6)+','+(it[2]+5)+' '+(it[1]+6)+','+(it[2]+5)+'" fill="#ffcc4d"/>');
+    } else if(k==='B'){
+      parts.push('<circle cx="'+it[1]+'" cy="'+it[2]+'" r="4.6" fill="#ff9f1a" stroke="#3a2200" stroke-width=".8"/>');
+      parts.push('<path d="M'+(it[1]-4.6)+','+it[2]+' A4.6,4.6 0 0 1 '+it[1]+','+(it[2]-4.6)+'" fill="none" stroke="#3a2200" stroke-width=".8"/>');
+    } else if(k==='K'){
+      parts.push('<rect x="'+(it[1]-6)+'" y="'+(it[2]-6)+'" width="12" height="12" rx="2" fill="#38d39f"/>');
+    } else if(k==='M'){
+      parts.push(arrow(it[1],it[2],it[3],it[4],'#dfe6f2',false));
+    } else if(k==='A'){
+      parts.push(arrow(it[1],it[2],it[3],it[4],'#ffb020',true));
+    } else if(k==='S'){
+      parts.push('<line x1="'+it[1]+'" y1="'+it[2]+'" x2="'+it[3]+'" y2="'+it[4]+'" stroke="#8ee6c4" stroke-width="2.2" stroke-dasharray="3 3"/>');
+    }
+  });
+  return '<svg viewBox="0 0 320 300" role="img" aria-label="半场布阵图">'+parts.join('')+'</svg>';
+}
+
+/* ---------- 班级档案 / 孩子档案 / 上课记录（纯本地） ---------- */
+const BC_KEYS={classes:'bc_classes_v1', history:'bc_history_v1', selected:'bc_selected_v1'};
+/* 六维评分：运球/传球/投篮/防守/体能/意识，各 1–5 分。数组顺序 = 雷达图六个轴（顶部起顺时针）。 */
+const KID_METRICS=[['dribble','运球'],['pass','传球'],['shoot','投篮'],['defense','防守'],['stamina','体能'],['iq','意识']];
+const KID_KEYS=KID_METRICS.map(m=>m[0]);
+const KID_DEFAULT=3;
+function kidMetricLabel(k){
+  for(let i=0;i<KID_METRICS.length;i++) if(KID_METRICS[i][0]===k) return KID_METRICS[i][1];
+  return String(k);
+}
+function kidHasVal(v){
+  return v!==undefined && v!==null && String(v).trim()!=='' && isFinite(Number(v));
+}
+/* 哪些项是「补出来的、还没人评」：老 4 项档案补的体能/意识就落在这里 */
+function kidPendingOf(a){
+  if(!a) return [];
+  if(Array.isArray(a.pending)) return a.pending.filter(k=>KID_KEYS.indexOf(k)>=0);
+  return KID_KEYS.filter(k=>!kidHasVal(a[k]));
+}
+const BC_MEM={};
+function bcLS(){
+  try{ if(typeof localStorage!=='undefined' && localStorage) return localStorage; }catch(e){}
+  return null;
+}
+function bcRead(key, fb){
+  try{
+    if(Object.prototype.hasOwnProperty.call(BC_MEM,key)) return JSON.parse(BC_MEM[key]);
+    const ls=bcLS(), raw=ls?ls.getItem(key):BC_MEM[key];
+    if(!raw) return fb;
+    const v=JSON.parse(raw);
+    return v==null?fb:v;
+  }catch(e){ return fb; }
+}
+function bcWrite(key, val){
+  const raw=JSON.stringify(val);
+  try{
+    const ls=bcLS();
+    if(ls){
+      ls.setItem(key,raw);
+      if(ls.getItem(key)===raw){ delete BC_MEM[key]; return true; }
+    }
+    BC_MEM[key]=raw; return !ls;
+  }catch(e){ BC_MEM[key]=raw; return false; }
+}
+function bcId(p){ return p+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function bcNow(){ return new Date().toISOString(); }
+function bcToday(){
+  const d=new Date(), z=n=>(n<10?'0':'')+n;
+  return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate());
+}
+function bcInt(v, lo, hi, fb){
+  v=Math.round(Number(v)); if(!isFinite(v)) v=fb;
+  return Math.max(lo,Math.min(hi,v));
+}
+function bcDate(v, fb){
+  const s=String(v||'').slice(0,10);
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s) && isFinite(new Date(s+'T00:00:00').getTime())) return s;
+  return fb;
+}
+function bcNormAssess(x){
+  x=x||{};
+  const date=bcDate(x.date||String(x.at||'').slice(0,10), bcToday());
+  const t=new Date(x.at||''), at=isFinite(t.getTime())?t.toISOString():date+'T12:00:00.000Z';
+  const out={id:String(x.id||bcId('a_')), date:date, at:at};
+  /* 老档案只有 4 项：缺的两项补 3 分并记进 pending（标「待评」），原 4 项与备注、日期一律不动 */
+  const miss=[];
+  KID_KEYS.forEach(k=>{
+    if(kidHasVal(x[k])) out[k]=bcInt(x[k],1,5,KID_DEFAULT);
+    else { out[k]=KID_DEFAULT; miss.push(k); }
+  });
+  out.pending=Array.isArray(x.pending)?x.pending.filter(k=>KID_KEYS.indexOf(k)>=0):miss;
+  out.note=String(x.note||'').trim().slice(0,80);
+  return out;
+}
+function bcSortAssess(list){
+  return list.slice().sort((a,b)=> a.date===b.date
+    ? String(b.at).localeCompare(String(a.at))
+    : String(b.date).localeCompare(String(a.date)));
+}
+function bcNormChild(x){
+  x=x||{};
+  const name=String(x.name||'未命名孩子').trim().slice(0,20)||'未命名孩子';
+  const list=Array.isArray(x.assessments)?x.assessments.map(bcNormAssess):[];
+  const seen={}, assessments=[];
+  bcSortAssess(list).forEach(a=>{ if(!seen[a.id]){ seen[a.id]=1; assessments.push(a); } });
+  return {
+    id:String(x.id||bcId('k_')),
+    name:name,
+    note:String(x.note||'').trim().slice(0,60),
+    createdAt:x.createdAt||bcNow(),
+    updatedAt:x.updatedAt||bcNow(),
+    assessments:assessments
+  };
+}
+function bcNormClass(x){
+  x=x||{};
+  const ages=AGES.concat(['MIX']);
+  const equip=Array.isArray(x.equip)?Array.from(new Set(x.equip.filter(e=>ALL_EQUIP.includes(e)))):['球','标志桶'];
+  const children=[];
+  if(Array.isArray(x.children)) x.children.forEach(k=>{
+    const child=bcNormChild(k);
+    if(!children.some(c=>c.id===child.id)) children.push(child);
+  });
+  return {
+    id:String(x.id||bcId('c_')),
+    name:String(x.name||'未命名班级').trim().slice(0,30)||'未命名班级',
+    age:ages.includes(x.age)?x.age:'U10',
+    players:bcInt(x.players,4,40,12),
+    level:[1,2,3].includes(Number(x.level))?Number(x.level):2,
+    equip:equip,
+    venue:String(x.venue||'').trim().slice(0,40),
+    totalLessons:bcInt(x.totalLessons,1,200,10),
+    children:children,
+    createdAt:x.createdAt||bcNow(), updatedAt:x.updatedAt||bcNow()
+  };
+}
+/* ---------- 六维雷达图（手写内联 SVG，不引库、不画 canvas） ---------- */
+const KID_RADAR={w:320,h:300,cx:160,cy:154,r:82,gap:24,max:5};
+function kidPtsStr(list){ return list.map(p=>p.x.toFixed(2)+','+p.y.toFixed(2)).join(' '); }
+function kidRound(n){ return Math.round(n*100)/100; }
+/* 六个轴顶点：半径 = 分数 / 5 * R，从正上方开始顺时针 */
+function kidRadarAxes(scoreObj){
+  const {cx,cy,r,max}=KID_RADAR;
+  return KID_METRICS.map((m,i)=>{
+    const ang=(-90+i*60)*Math.PI/180;
+    const v=kidHasVal(scoreObj?scoreObj[m[0]]:null)?Math.min(max,Math.max(0,Number(scoreObj[m[0]]))):0;
+    const rad=r*v/max;
+    return {key:m[0], label:m[1], value:v, ang:ang,
+      x:kidRound(cx+rad*Math.cos(ang)), y:kidRound(cy+rad*Math.sin(ang))};
+  });
+}
+/* 只有坐标，方便测「改分数 → 顶点跟着动」 */
+function kidRadarPoints(scoreObj){ return kidRadarAxes(scoreObj).map(a=>({x:a.x,y:a.y})); }
+function kidRadarLabelPos(i){
+  const {cx,cy,r,gap}=KID_RADAR, ang=(-90+i*60)*Math.PI/180, rr=r+gap;
+  return {x:kidRound(cx+rr*Math.cos(ang)), y:kidRound(cy+rr*Math.sin(ang))};
+}
+/* 轴标签旁这次的分：首次只写数；有上次就带方向 ↑ / ↓n / →；待评轴不摆数 */
+function kidRadarScore(latest, prev, key){
+  if(!latest || kidPendingOf(latest).indexOf(key)>=0) return null;
+  const v=Number(latest[key])||0;
+  if(!prev || !kidHasVal(prev[key]) || kidPendingOf(prev).indexOf(key)>=0) return {text:String(v), cls:'kidNone'};
+  const d=v-(Number(prev[key])||0);
+  if(d>0) return {text:v+'↑', cls:'kidUp'};
+  if(d<0) return {text:v+'↓'+Math.abs(d), cls:'kidDown'};
+  return {text:v+'→', cls:'kidFlat'};
+}
+function kidRadarSvg(latest, prev){
+  const {w,h,cx,cy,r,max}=KID_RADAR, parts=[];
+  for(let ring=max;ring>=1;ring--){
+    const pts=KID_METRICS.map((m,i)=>{
+      const ang=(-90+i*60)*Math.PI/180, rad=r*ring/max;
+      return {x:kidRound(cx+rad*Math.cos(ang)), y:kidRound(cy+rad*Math.sin(ang))};
+    });
+    parts.push('<polygon class="rRadarRing" data-ring="'+ring+'" points="'+kidPtsStr(pts)+'"/>');
+  }
+  KID_METRICS.forEach((m,i)=>{
+    const ang=(-90+i*60)*Math.PI/180;
+    parts.push('<line class="rRadarSpoke" x1="'+cx+'" y1="'+cy+'" x2="'+kidRound(cx+r*Math.cos(ang))+'" y2="'+kidRound(cy+r*Math.sin(ang))+'"/>');
+  });
+  if(prev) parts.push('<polygon class="rRadarPrev" data-prev="1" points="'+kidPtsStr(kidRadarPoints(prev))+'"/>');
+  const pend=latest?kidPendingOf(latest):[];
+  if(latest){
+    parts.push('<polygon class="rRadarNow" data-now="1" points="'+kidPtsStr(kidRadarPoints(latest))+'"/>');
+    kidRadarPoints(latest).forEach(p=>{ parts.push('<circle class="rRadarDot" cx="'+p.x+'" cy="'+p.y+'" r="2.6"/>'); });
+  }
+  KID_METRICS.forEach((m,i)=>{
+    const p=kidRadarLabelPos(i), wait=pend.indexOf(m[0])>=0, sc=kidRadarScore(latest,prev,m[0]);
+    const lx=kidRound(p.x-(sc?5:0)), sy=kidRound(p.y+4);
+    parts.push('<g class="rRadarAxis" data-axis="'+m[0]+'">'+
+      '<text class="rRadarLabel" data-axis="'+m[0]+'" x="'+lx+'" y="'+sy+'" text-anchor="'+(sc?'end':'middle')+'">'+
+      m[1]+(wait?'·待评':'')+'</text>'+
+      (sc?'<text class="rRadarScore '+sc.cls+'" data-for="'+m[0]+'" x="'+kidRound(p.x+5)+'" y="'+sy+'" text-anchor="start">'+sc.text+'</text>':'')+
+      '</g>');
+  });
+  const aria='六维评分雷达图，'+(latest?'最近一次':'还没有评分')+'：'+
+    KID_METRICS.map(m=>{
+      const sc=latest?kidRadarScore(latest,prev,m[0]):null;
+      return m[1]+(pend.indexOf(m[0])>=0?'待评':((sc?sc.text:'0')+'分'));
+    }).join('，');
+  return '<svg class="kidRadar" viewBox="0 0 '+w+' '+h+'" role="img" aria-label="'+aria+'">'+
+    '<title>六维评分雷达图</title>'+parts.join('')+'</svg>';
+}
+/* 一句人话小结：谁最强、谁最弱、比上次进步/退步的是谁 */
+function kidSummaryText(latest, prev){
+  if(!latest) return '还没有评分：点这张卡，给六项各打一次分就能看到形状。';
+  const vals=KID_METRICS.map(m=>[m[0],m[1],Number(latest[m[0]])||0]);
+  let hi=vals[0], lo=vals[0];
+  vals.forEach(v=>{ if(v[2]>hi[2]) hi=v; if(v[2]<lo[2]) lo=v; });
+  let s;
+  if(hi[2]===lo[2]) s='六项都是 '+hi[2]+' 分，还看不出明显强项和短板';
+  else s=hi[1]+'最强，'+lo[1]+'最弱';
+  if(!prev){ s+='；这是第一次评分，再记一次就能看出变化'; }
+  else{
+    const up=[], down=[];
+    KID_METRICS.forEach(m=>{
+      const a=Number(latest[m[0]])||0, b=Number(prev[m[0]])||0;
+      if(a>b) up.push(m[1]); else if(a<b) down.push(m[1]);
+    });
+    if(up.length&&down.length) s+='；比上次进步的是'+up.join('、')+'，退步的是'+down.join('、');
+    else if(up.length) s+='；比上次进步的是'+up.join('、');
+    else if(down.length) s+='；比上次退步的是'+down.join('、');
+    else s+='；六项和上次一样，持平';
+  }
+  const pend=kidPendingOf(latest);
+  if(pend.length) s+='；'+pend.map(kidMetricLabel).join('、')+' 待评（按 '+KID_DEFAULT+' 分占位）';
+  return s;
+}
+function bcNormHist(x){
+  x=x||{};
+  const at=String(x.at||bcNow()), t=new Date(at);
+  const iso=isFinite(t.getTime())?t.toISOString():bcNow();
+  const taught=x.taught!==false;
+  return {
+    id:String(x.id||bcId('h_')),
+    classId:x.classId?String(x.classId):null,
+    className:String(x.className||'临时排课').slice(0,30),
+    at:iso,
+    date:iso.slice(0,10),
+    theme:String(x.theme||'综合').slice(0,20),
+    duration:bcInt(x.duration,20,150,60),
+    age:AGE_IDS.includes(x.age)?x.age:'U10',
+    players:bcInt(x.players,4,40,12),
+    level:[1,2,3].includes(Number(x.level))?Number(x.level):2,
+    drillIds:Array.isArray(x.drillIds)?Array.from(new Set(x.drillIds.map(String))):[],
+    taught:taught,
+    manual:x.manual===true,
+    voided:!taught && x.voided===true,
+    taughtAt:taught?(x.taughtAt||null):null
+  };
+}
+function bcSortHist(list){
+  return list.slice().sort((a,b)=> new Date(b.at)-new Date(a.at));
+}
+const classStore={
+  keys:BC_KEYS,
+  listClasses(){ return (Array.isArray(bcRead(BC_KEYS.classes,[]))?bcRead(BC_KEYS.classes,[]):[]).map(bcNormClass); },
+  getClass(id){ return this.listClasses().find(c=>c.id===id)||null; },
+  saveClass(input){
+    input=input||{};
+    const all=this.listClasses();
+    const i=input.id?all.findIndex(c=>c.id===input.id):-1;
+    const c=bcNormClass(Object.assign({},i>=0?all[i]:{},input,{updatedAt:bcNow()}));
+    if(i>=0) all[i]=c; else all.push(c);
+    bcWrite(BC_KEYS.classes,all);
+    return c;
+  },
+  deleteClass(id){
+    bcWrite(BC_KEYS.classes,this.listClasses().filter(c=>c.id!==id));
+    bcWrite(BC_KEYS.history,this.listHistory().filter(h=>h.classId!==id));
+    if(this.selectedId()===id) this.select(null);
+  },
+  selectedId(){ try{ return bcRead(BC_KEYS.selected,null); }catch(e){ return null; } },
+  select(id){ id=id||null; if(id) bcWrite(BC_KEYS.selected,id); else {
+    delete BC_MEM[BC_KEYS.selected];
+    const ls=bcLS(); try{ if(ls) ls.removeItem(BC_KEYS.selected); }catch(e){}
+  } },
+  selectedClass(){ const id=this.selectedId(); return id?this.getClass(id):null; },
+  lessonProgress(classId){
+    const cls=this.getClass(classId);
+    if(!cls) return null;
+    const hist=this.historyFor(classId,1000);
+    const done=hist.filter(h=>h.taught).length;
+    const pending=hist.filter(h=>!h.taught && !h.voided).length;
+    const voided=hist.filter(h=>h.voided).length;
+    const total=cls.totalLessons;
+    const left=Math.max(0,total-done), over=Math.max(0,done-total);
+    return {done:done,total:total,left:left,over:over,pending:pending,voided:voided,
+      history:hist.length,warn:left<=2};
+  },
+  setTotalLessons(classId,total){
+    const all=this.listClasses(), i=all.findIndex(c=>c.id===classId);
+    if(i<0) return null;
+    const cls=bcNormClass(Object.assign({},all[i],{totalLessons:total,updatedAt:bcNow()}));
+    all[i]=cls; bcWrite(BC_KEYS.classes,all);
+    return cls;
+  },
+  markTaught(classId, opts){
+    opts=opts||{};
+    const cls=this.getClass(classId);
+    if(!cls) return null;
+    const hist=this.listHistory();
+    let idx=-1;
+    if(opts.historyId) idx=hist.findIndex(h=>h.id===opts.historyId && (h.classId||null)===(classId||null));
+    if(idx>=0 && hist[idx].taught && (opts.from==='finish' || opts.historyId))
+      return {record:hist[idx],added:false,already:true,progress:this.lessonProgress(classId)};
+    if(idx<0 && !opts.historyId)
+      idx=hist.findIndex(h=>h.classId===classId && !h.taught && !h.voided);
+    if(idx>=0 && !hist[idx].taught){
+      hist[idx]=bcNormHist(Object.assign({},hist[idx],{taught:true,voided:false,
+        taughtAt:opts.at||bcNow()}));
+      bcWrite(BC_KEYS.history,hist);
+      return {record:hist[idx],added:false,converted:true,progress:this.lessonProgress(classId)};
+    }
+    if(idx>=0 && hist[idx].taught)
+      return {record:hist[idx],added:false,already:true,progress:this.lessonProgress(classId)};
+    const rec=this.addHistory({
+      classId:classId,className:cls.name,at:opts.at||bcNow(),theme:'补记',duration:60,
+      age:cls.age,players:cls.players,level:cls.level,
+      drillIds:Array.isArray(opts.drillIds)?opts.drillIds:[],
+      taught:true,manual:true,taughtAt:opts.at||bcNow()
+    });
+    return {record:rec,added:true,converted:false,progress:this.lessonProgress(classId)};
+  },
+  correctDone(classId,target,opts){
+    opts=opts||{};
+    const p=this.lessonProgress(classId);
+    if(!p) return null;
+    let want=Math.round(Number(target));
+    if(!isFinite(want)) want=p.done;
+    want=Math.max(0,Math.min(200,want));
+    const diff=want-p.done;
+    if(!diff) return {changed:0,added:0,unmarked:0,progress:p};
+    const all=this.listHistory();
+    if(diff>0){
+      const cls=this.getClass(classId), base=Date.now(), rows=[];
+      for(let i=0;i<diff;i++) rows.push(bcNormHist({
+        classId:classId,className:cls.name,at:opts.at||new Date(base+i*1000).toISOString(),
+        theme:'补记',duration:60,age:cls.age,players:cls.players,level:cls.level,
+        drillIds:[],taught:true,manual:true,taughtAt:bcNow()
+      }));
+      bcWrite(BC_KEYS.history,bcSortHist(rows.concat(all)).slice(0,1000));
+    } else {
+      let need=-diff;
+      const marked=all.map((h,i)=>({h:h,i:i}))
+        .filter(x=>x.h.taught && (x.h.classId||null)===(classId||null))
+        .sort((a,b)=>(Number(b.h.manual)-Number(a.h.manual))||
+          (new Date(b.h.at)-new Date(a.h.at)));
+      marked.slice(0,need).forEach(x=>{
+        all[x.i]=bcNormHist(Object.assign({},x.h,{taught:false,voided:true,taughtAt:null}));
+      });
+      bcWrite(BC_KEYS.history,all);
+    }
+    return {changed:diff,added:Math.max(0,diff),unmarked:Math.max(0,-diff),
+      progress:this.lessonProgress(classId)};
+  },
+  listChildren(classId){ const c=this.getClass(classId); return c?c.children:[]; },
+  getChild(classId, childId){ return this.listChildren(classId).find(k=>k.id===childId)||null; },
+  saveChild(classId, input){
+    input=input||{};
+    const all=this.listClasses(), i=all.findIndex(c=>c.id===classId);
+    if(i<0) return null;
+    const cls=all[i], j=input.id?cls.children.findIndex(k=>k.id===input.id):-1;
+    const base=j>=0?cls.children[j]:{};
+    const child=bcNormChild(Object.assign({},base,input,{updatedAt:bcNow()}));
+    const children=cls.children.slice();
+    if(j>=0) children[j]=child; else children.push(child);
+    cls.children=children; cls.updatedAt=bcNow(); all[i]=cls;
+    bcWrite(BC_KEYS.classes,all);
+    return child;
+  },
+  deleteChild(classId, childId){
+    const all=this.listClasses(), i=all.findIndex(c=>c.id===classId);
+    if(i<0) return false;
+    const cls=all[i], children=cls.children.filter(k=>k.id!==childId);
+    if(children.length===cls.children.length) return false;
+    cls.children=children; cls.updatedAt=bcNow(); all[i]=cls;
+    bcWrite(BC_KEYS.classes,all);
+    return true;
+  },
+  addAssessment(classId, childId, input){
+    const all=this.listClasses(), i=all.findIndex(c=>c.id===classId);
+    if(i<0) return null;
+    const cls=all[i], j=cls.children.findIndex(k=>k.id===childId);
+    if(j<0) return null;
+    const a=bcNormAssess(input||{});
+    const children=cls.children.slice();
+    children[j]=Object.assign({},children[j],{
+      assessments:bcSortAssess([a].concat(children[j].assessments)),
+      updatedAt:bcNow()
+    });
+    cls.children=children; cls.updatedAt=bcNow(); all[i]=cls;
+    bcWrite(BC_KEYS.classes,all);
+    return a;
+  },
+  childSummary(classId, childId){
+    const child=this.getChild(classId,childId);
+    if(!child) return null;
+    const list=child.assessments, latest=list[0]||null, prev=list[1]||null, dirs={};
+    KID_METRICS.forEach(m=>{
+      const k=m[0];
+      dirs[k]=!latest||!prev?'none':latest[k]>prev[k]?'up':latest[k]<prev[k]?'down':'flat';
+    });
+    return {child:child, latest:latest, prev:prev, dirs:dirs, count:list.length, recent:list.slice(0,3)};
+  },
+  listHistory(){
+    const arr=bcRead(BC_KEYS.history,[]);
+    return bcSortHist((Array.isArray(arr)?arr:[]).map(bcNormHist));
+  },
+  addHistory(rec){
+    const h=bcNormHist(rec);
+    const all=this.listHistory(); all.unshift(h);
+    bcWrite(BC_KEYS.history,all.slice(0,1000));
+    return h;
+  },
+  deleteHistory(id){ bcWrite(BC_KEYS.history,this.listHistory().filter(h=>h.id!==id)); },
+  historyFor(classId, limit){
+    const list=this.listHistory().filter(h=> (h.classId||null)===(classId||null));
+    return list.slice(0, limit||5);
+  },
+  recentDrillIds(classId, n){
+    if(!classId) return [];
+    const ids=[];
+    this.historyFor(classId,n||2).forEach(h=>h.drillIds.forEach(id=>{ if(!ids.includes(id)) ids.push(id); }));
+    return ids;
+  },
+  exportData(){ return {version:1, exportedAt:bcNow(), classes:this.listClasses(), history:this.listHistory()}; },
+  importData(input){
+    let data=input;
+    if(typeof data==='string') data=JSON.parse(data);
+    if(!data || !Array.isArray(data.classes) || !Array.isArray(data.history)) throw new Error('备份格式不对：需要 classes 与 history 数组');
+    const classes=data.classes.map(bcNormClass);
+    const ids=new Set(classes.map(c=>c.id));
+    const history=data.history.map(bcNormHist).map(h=>{ if(h.classId && !ids.has(h.classId)) h.classId=null; return h; });
+    bcWrite(BC_KEYS.classes,classes);
+    bcWrite(BC_KEYS.history,history);
+    this.select(null);
+    const children=classes.reduce((n,c)=>n+c.children.length,0);
+    return {classes:classes.length, history:history.length, children:children};
+  }
+};
+function generateLesson(cfg, classId, at){
+  const cls=classId?classStore.getClass(classId):null;
+  const exclude=cls?classStore.recentDrillIds(cls.id,2):[];
+  const L=buildLesson(Object.assign({},cfg,{excludeIds:exclude}));
+  const rec={
+    classId:cls?cls.id:null, className:cls?cls.name:'临时排课',
+    at:at||bcNow(), theme:L.cfg.theme, duration:L.cfg.duration,
+    age:L.cfg.age, players:L.cfg.players, level:L.cfg.level,
+    drillIds:L.blocks.map(b=>b.d.id), taught:false
+  };
+  L.history=classStore.addHistory(rec);
+  L.className=rec.className;
+  L.rotationExcluded=exclude.length;
+  return L;
+}
+
+/* ---------- 家长课报：只改写已有家长话术，纯文本 ≤200 字 ---------- */
+function reportLen(s){ return Array.from(String(s||'')).length; }
+function reportClip(s, max){
+  let cut=Array.from(String(s||'')).slice(0, max).join('');
+  if(Array.from(String(s||'')).length<=max) return cut;
+  const open=cut.lastIndexOf('“'), close=cut.lastIndexOf('”');
+  if(open>close) cut=cut.slice(0,open);
+  const p=Math.max(cut.lastIndexOf('，'), cut.lastIndexOf('；'), cut.lastIndexOf('、'));
+  if(p>=6) cut=cut.slice(0,p);
+  return cut.replace(/[，,；;。、]+$/,'');
+}
+function reportBrief(parent, max){
+  const src=String(parent||'').replace(/\s+/g,' ').replace(/[。！？!?；;]+$/,'').trim();
+  if(!src) return '';
+  const parts=src.split(/[，,；;]/).map(x=>x.trim()).filter(Boolean);
+  if(!parts.length) return '';
+  let pick=parts[0];
+  if((reportLen(pick)<8 || pick.indexOf('不是')>=0) && parts[1]){
+    const both=pick+'，'+parts[1];
+    if(reportLen(both)<=max) pick=both;
+  }
+  if(reportLen(pick)>max){
+    const k=pick.indexOf('是');
+    if(k>0 && pick[k-1]!=='不'){
+      const tail=pick.slice(k+1);
+      if(reportLen(tail)>=6 && reportLen(tail)<=max) pick=tail;
+    }
+  }
+  if(reportLen(pick)>max){
+    const pfx=parts[0].split(/的|是/)[0];
+    if(reportLen(pfx)>=2 && reportLen(pfx)<=5){
+      for(let i=1;i<parts.length;i++){
+        const cand=pfx+'：'+parts[i];
+        if(reportLen(cand)>=6 && reportLen(cand)<=max){ pick=cand; break; }
+      }
+    }
+  }
+  if(reportLen(pick)>max) pick=reportClip(pick, max);
+  return pick.replace(/[，,；;。]+$/,'');
+}
+function reportBlockBrief(block, max){
+  const d=(block && block.d) || {};
+  return reportBrief(d.parent, max) || reportClip(String(d.name||'本环节'), max);
+}
+function parentReport(L, date){
+  const blocks=(L && Array.isArray(L.blocks)) ? L.blocks : [];
+  if(!blocks.length) return '';
+  const cfg=(L && L.cfg) || {};
+  const day=String(date||'').trim() || (typeof bcToday==='function'?bcToday():'');
+  const age=cfg.age==='MIX'?'混龄':(cfg.age||'');
+  const theme=cfg.theme||'';
+  const minutes=Number(cfg.duration||L.total||0);
+  const players=Number((L&&L.players)||cfg.players||0);
+  const head=day+' 家长课报\n'+age+'·'+theme+'·'+minutes+'分钟·'+players+'人·本次'+blocks.length+'个环节：';
+  const tail='下次：继续巩固今天这几个环节。';
+  const budgets=[24,20,18,17,16,15,14,13,12,11,10,9,8,7,6];
+  for(let i=0;i<budgets.length;i++){
+    const briefs=blocks.map(b=>reportBlockBrief(b, budgets[i]));
+    const text=head+briefs.join('；')+'。'+tail;
+    if(reportLen(text)<=200) return text;
+  }
+  const briefs=blocks.map(b=>reportBlockBrief(b, 6));
+  return head+briefs.join('；')+'。'+tail;
+}
+
+if (typeof globalThis !== 'undefined') {
+  globalThis.BC = {DRILLS:DRILLS, RULES:RULES, AGES:AGES, THEMES:THEMES,
+    ALL_EQUIP:ALL_EQUIP, buildLesson:buildLesson, fmtClock:fmtClock, timerMeta:timerMeta, phaseName:phaseName,
+    validateDrill:validateDrill, svgDiagram:svgDiagram, hasEquip:hasEquip,
+    normSite:normSite, siteLabel:siteLabel, drillSiteIssue:drillSiteIssue,
+    NO_HOOP_IDS:NO_HOOP_IDS, NO_FULL_IDS:NO_FULL_IDS,
+    classStore:classStore, generateLesson:generateLesson, parentReport:parentReport, BC_KEYS:BC_KEYS,
+    KID_METRICS:KID_METRICS, KID_KEYS:KID_KEYS, KID_DEFAULT:KID_DEFAULT,
+    kidMetricLabel:kidMetricLabel, kidPendingOf:kidPendingOf,
+    kidRadarAxes:kidRadarAxes, kidRadarPoints:kidRadarPoints, kidRadarSvg:kidRadarSvg, kidRadarScore:kidRadarScore,
+    kidSummaryText:kidSummaryText, KID_RADAR:KID_RADAR};
+}
+</script>
+<script>
+const $ = s=>document.querySelector(s);
+const esc = s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+let lesson=null, timer={blocks:[],i:0,left:0,run:false,id:null,total:0,done:false,open:false,src:null,scrollY:0,
+  classId:null,historyId:null};
+
+/* ---- 导航 ---- */
+function switchView(v){
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'));
+  const el=document.getElementById('view-'+v); if(el) el.classList.add('on');
+  document.body.classList.toggle('faOpen', v==='safety');
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on', b.dataset.v===v));
+  if(v==='class' && typeof renderClassList==='function') renderClassList();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.v)));
+
+/* ---- 急救速查（#192 独立第 5 个页签；#188 去掉打印，改成手机直接看） ---- */
+function openFirstAid(){ switchView('safety'); }
+function closeFirstAid(){ switchView('plan'); }
+/* #194 窄屏默认折着：只露标题 + 第一句，点开看全部；宽屏 CSS 强制全展开，点不点都一样。 */
+function faFirstSentence(txt){
+  const m=String(txt).match(/^[^。！？]*[。！？]/);
+  return (m?m[0]:String(txt)).trim();
+}
+function initFirstAidFold(){
+  document.querySelectorAll('#view-safety .faItem').forEach(el=>{
+    const doEl=el.querySelector('.faDo'); if(!doEl) return;
+    if(el.querySelector('.faPrev')) return;
+    const c=doEl.cloneNode(true);
+    c.querySelectorAll('.faMust').forEach(n=>n.remove());
+    const prev=document.createElement('p');
+    prev.className='faPrev';
+    prev.textContent=faFirstSentence(c.textContent);
+    const more=document.createElement('span');
+    more.className='faMore'; more.textContent='点开看处置 ▾';
+    prev.appendChild(more);
+    el.insertBefore(prev, doEl);
+    el.classList.add('fold');
+    el.setAttribute('role','button');
+    el.setAttribute('tabindex','0');
+    el.setAttribute('aria-expanded','false');
+  });
+  document.querySelectorAll('#view-safety .faItem').forEach(el=>{
+    const flip=()=>{
+      const folded=el.classList.toggle('fold');
+      el.setAttribute('aria-expanded', folded?'false':'true');
+    };
+    el.addEventListener('click',e=>{ if(e.target.closest('a')) return; flip(); });
+    el.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); flip(); } });
+  });
+  const jump=document.getElementById('faJump');
+  if(jump) jump.addEventListener('click',e=>{
+    const a=e.target.closest('a[href^="#fa-"]'); if(a) faOpen(a.getAttribute('href').slice(1));
+  });
+  window.addEventListener('hashchange',()=>{ if(location.hash.indexOf('#fa-')===0) faOpen(location.hash.slice(1)); });
+}
+function faOpen(id){
+  const el=document.getElementById(id); if(!el || !el.classList.contains('faItem')) return;
+  el.classList.remove('fold');
+  el.setAttribute('aria-expanded','true');
+}
+
+/* ---- 器材 chips ---- */
+function initEquip(){
+  ['#fEquip','#fEquipEdit'].forEach(sel=>{
+    const box=$(sel); if(!box) return;
+    ALL_EQUIP.forEach(e=>{
+      const s=document.createElement('span');
+      s.className='chip'+(sel==='#fEquip'&&['球','标志桶'].includes(e)?' on':'');
+      s.textContent=e; s.dataset.e=e;
+      s.addEventListener('click',()=>s.classList.toggle('on'));
+      box.appendChild(s);
+    });
+  });
+}
+function getEquip(){ return Array.from(document.querySelectorAll('#fEquip .chip.on')).map(x=>x.dataset.e); }
+function getEditEquip(){ return Array.from(document.querySelectorAll('#fEquipEdit .chip.on')).map(x=>x.dataset.e); }
+
+/* ---- 班级档案 / 上课记录 ---- */
+const DRILL_BY_ID={}; DRILLS.forEach(d=>DRILL_BY_ID[d.id]=d);
+function fmtWhen(at){
+  const d=new Date(at); if(!isFinite(d.getTime())) return String(at||'');
+  const p=n=>String(n).padStart(2,'0');
+  return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());
+}
+function classFormFields(){
+  // 班级页编辑区的六项 + 总课时；改完点「保存」写回选中的那一班
+  return {name:$('#fClassName').value.trim(), age:$('#ceAge').value,
+    players:Number($('#cePlayers').value)||12, level:Number($('#ceLevel').value),
+    equip:getEditEquip(), venue:$('#ceVenue').value.trim(),
+    totalLessons:Number($('#fTotal').value)||10};
+}
+function lessonMeterText(p){
+  return '第 '+p.done+' 节 / 共 '+p.total+' 节 / 剩 '+p.left+' 节'+(p.over?'（已超 '+p.over+' 节）':'');
+}
+function renderLessonMeter(c){
+  const pill=$('#lessonPill'), btn=$('#btnTaught');
+  if(!pill) return null;
+  if(!c){
+    pill.hidden=true; pill.textContent=''; pill.className='lessonPill'; pill.title='';
+    if(btn) btn.disabled=true;
+    return null;
+  }
+  const p=classStore.lessonProgress(c.id);
+  if(!p){ pill.hidden=true; if(btn) btn.disabled=true; return null; }
+  pill.hidden=false;
+  pill.className='lessonPill'+(p.left<=2?' warn':'')+(p.over?' over':'');
+  pill.textContent=lessonMeterText(p)+(p.pending?' · 待上 '+p.pending+' 节':'');
+  pill.title='已上节数 N 只由该班历史里「已上」条数算出；K≤2 时提示续课';
+  if(btn) btn.disabled=false;
+  return p;
+}
+function classNote(c){
+  if(!c){ renderLessonMeter(null);
+    return '未选班级：本次只记临时排课，不参与轮换；填班名后点「存回该班」可建新班'; }
+  const p=renderLessonMeter(c)||classStore.lessonProgress(c.id);
+  return '已选「'+c.name+'」· '+c.age+' · '+c.players+' 人 · '+lessonMeterText(p)+
+    (p.pending?' · 待上 '+p.pending+' 节':'')+' · 下次自动避开最近 2 次环节';
+}
+function applyClass(c){
+  if(!c) return;
+  $('#fAge').value=c.age;
+  $('#fPlayers').value=c.players;
+  $('#fLevel').value=String(c.level);
+  $('#fVenue').value=c.venue||'';
+  $('#fClassName').value=c.name;
+  $('#fTotal').value=c.totalLessons;
+  document.querySelectorAll('#fEquip .chip').forEach(ch=>ch.classList.toggle('on', c.equip.includes(ch.dataset.e)));
+  $('#classNote').textContent=classNote(c);
+  syncClassEditor(c);
+}
+function refreshClassSelect(){
+  const all=classStore.listClasses(), cur=classStore.selectedId();
+  $('#classSel').innerHTML='<option value="">临时排课</option>'+
+    all.map(c=>'<option value="'+esc(c.id)+'">'+esc(c.name)+'</option>').join('');
+  if(cur && all.some(c=>c.id===cur)) $('#classSel').value=cur;
+  else { $('#classSel').value=''; if(cur) classStore.select(null);
+    $('#fTotal').value='10'; renderLessonMeter(null); }
+  renderClassList();
+}
+/* ---- 班级页（#187）：列表 + 新建 + 编辑 + 删除 ---- */
+function syncClassEditor(c){
+  const ed=$('#classEditor'); if(!ed) return;
+  if(!c) c=classStore.selectedClass();
+  if(!c){ ed.hidden=true; ed.dataset.cid=''; return; }
+  const who=$('#classEditWho'); if(who) who.textContent=c.name;
+  // 同一班正在编辑：不覆盖用户刚敲进去的内容（只有换班/新建/导入才重填）
+  if(!ed.hidden && ed.dataset.cid===c.id) return;
+  ed.hidden=false; ed.dataset.cid=c.id;
+  $('#fClassName').value=c.name;
+  $('#ceAge').value=c.age;
+  $('#cePlayers').value=c.players;
+  $('#ceLevel').value=String(c.level);
+  $('#ceVenue').value=c.venue||'';
+  $('#fTotal').value=c.totalLessons;
+  document.querySelectorAll('#fEquipEdit .chip').forEach(ch=>ch.classList.toggle('on', c.equip.includes(ch.dataset.e)));
+}
+function classRowHtml(c,cur){
+  const p=classStore.lessonProgress(c.id)||{done:0,total:c.totalLessons};
+  return '<button type="button" role="listitem" class="cpRow'+(c.id===cur?' on':'')+'"'+
+    ' data-cid="'+esc(c.id)+'"'+(c.id===cur?' aria-current="true"':'')+'>'+
+    '<span class="cpName">'+esc(c.name)+'</span>'+
+    '<span class="cpAge">'+esc(c.age)+' · '+c.players+' 人</span>'+
+    '<span class="cpLevel">'+esc(levelName(c.level))+'</span>'+
+    '<span class="cpTotal">共 '+p.total+' 节</span>'+
+    '<span class="cpMeter">已上 '+p.done+' 节</span></button>';
+}
+function kidCardHtml(c,k){
+  const s=classStore.childSummary(c.id,k.id)||{latest:null,prev:null,count:0,recent:[]};
+  const pend=kidPendingOf(s.latest);
+  const meta=s.count?('共 '+s.count+' 次 · 最近 '+String(s.latest? s.latest.date:'').slice(5)):'还没有评分';
+  let h='<article class="kbItem"><button type="button" class="kbTap" data-kid="'+esc(k.id)+'"'+
+    ' aria-label="'+esc(k.name)+' 的六维评分，点开逐项改分">'+
+    '<span class="kbTop"><b>'+esc(k.name)+'</b><span class="kbMeta">'+esc(meta)+'</span></span>'+
+    '<span class="kbChart">'+kidRadarSvg(s.latest,s.prev)+'</span>'+
+    '<span class="kbLine">'+esc(kidSummaryText(s.latest,s.prev))+'</span>';
+  if(pend.length) h+='<span class="kbPend">'+esc(pend.map(kidMetricLabel).join('、'))+' 待评</span>';
+  return h+'</button></article>';
+}
+/* 班级页「孩子评分」：每个孩子一张六维图，不点弹窗也看得见 */
+function renderKidBoard(){
+  const box=$('#kidBoardList'); if(!box) return;
+  const c=classStore.selectedClass();
+  if(!c){ box.innerHTML='<div class="kbEmpty">还没有选中班级。先在上面新建，或点一行选中；选中后这里每个孩子一张六维图。</div>'; return; }
+  const kids=c.children||[];
+  if(!kids.length){ box.innerHTML='<div class="kbEmpty">「'+esc(c.name)+'」还没有孩子。点上面「孩子评分」建一个，建好后这里每个孩子一张六维图。</div>'; return; }
+  box.innerHTML=kids.map(k=>kidCardHtml(c,k)).join('');
+}
+function renderClassList(){
+  const box=$('#classListBox'); if(!box) return [];
+  const all=classStore.listClasses(), cur=classStore.selectedId();
+  box.innerHTML=all.map(c=>classRowHtml(c,cur)).join('');
+  const emp=$('#classEmpty'); if(emp) emp.hidden=all.length>0;
+  syncClassEditor(classStore.selectedClass());
+  renderKidBoard();
+  return all;
+}
+function pickClass(id){
+  const c=classStore.getClass(id); if(!c) return;
+  classStore.select(c.id);
+  refreshClassSelect();
+  applyClass(c);
+  if($('#planStage') && $('#planStage').dataset.stage==='plan') editNeeds();
+  $('#classPageHint').textContent='正在编辑「'+c.name+'」：六项档案、总课时改完点「保存」；回「排课」页它就自动填进需求。';
+}
+function deleteClassFromEditor(){
+  const c=classStore.selectedClass();
+  if(!c){ $('#classPageHint').textContent='先在列表里点一个班，再删除'; return; }
+  if(!confirm('删除班级「'+c.name+'」？\n该班的六项档案、孩子评分和全部上课记录会一起删掉，删了不能恢复。')) return;
+  classStore.deleteClass(c.id);
+  classStore.select(null);
+  refreshClassSelect();
+  $('#classNote').textContent=classNote(null);
+  $('#classPageHint').textContent='已删除：'+c.name;
+  showClassToast('已删除：'+c.name);
+}
+let classToastTimer=null;
+function showClassToast(msg){
+  const t=$('#classToast'); if(!t) return;
+  t.textContent=msg; t.hidden=false;
+  if(classToastTimer) clearTimeout(classToastTimer);
+  classToastTimer=setTimeout(()=>{ t.hidden=true; classToastTimer=null; }, 3200);
+}
+function newClassError(msg){
+  const e=$('#newClassErr');
+  e.textContent=msg||''; e.hidden=!msg;
+}
+function newClass(){
+  newClassError('');
+  $('#newClassName').value='';
+  $('#newClassModal').hidden=false;
+  $('#newClassName').focus();
+}
+function closeNewClass(focusBack){
+  $('#newClassModal').hidden=true;
+  $('#newClassName').value='';
+  newClassError('');
+  if(focusBack) $('#btnNewClass').focus();
+}
+function createClassFromPrompt(){
+  const name=$('#newClassName').value.trim();
+  if(!name){
+    newClassError('班名不能为空，请先填一个名字');
+    $('#newClassName').focus();
+    return;
+  }
+  if(classStore.listClasses().some(c=>c.name===name)){
+    newClassError('已有同名班级「'+name+'」，请换一个名字');
+    $('#newClassName').select();
+    return;
+  }
+  const c=classStore.saveClass({name:name});
+  classStore.select(c.id);
+  refreshClassSelect();
+  applyClass(c);
+  closeNewClass(false);
+  if($('#planStage').dataset.stage==='plan') editNeeds();
+  $('#classNote').textContent='已新建：'+c.name+' · 已选中，可继续补六项后点「保存」';
+  if(typeof syncClassEditor==='function') syncClassEditor(c);
+  showClassToast('已新建：'+c.name);
+}
+function saveClassFromForm(){
+  const f=classFormFields();
+  if(!f.name){
+    $('#classEditHint').textContent='班名不能为空，先填名字再点「保存」';
+    $('#fClassName').focus(); return;
+  }
+  const selected=classStore.selectedClass();
+  if(classStore.listClasses().some(x=>x.name===f.name && (!selected||x.id!==selected.id))){
+    $('#classEditHint').textContent='已有同名班级「'+f.name+'」，请换一个名字';
+    $('#fClassName').select(); return;
+  }
+  const c=classStore.saveClass({id:selected?selected.id:null, name:f.name, age:f.age,
+    players:f.players, level:f.level, equip:f.equip, venue:f.venue, totalLessons:f.totalLessons});
+  classStore.select(c.id);
+  refreshClassSelect();
+  applyClass(c);
+  $('#classEditHint').textContent='已保存：'+c.name+' · 六项档案与总课时都写回这一班';
+  $('#classPageHint').textContent='已保存：'+c.name+'；回「排课」页生成教案会用这份档案。';
+  showClassToast('已保存：'+c.name);
+}
+function markTaughtSelected(){
+  const c=classStore.selectedClass();
+  if(!c){ $('#classNote').textContent='先选班级，再标记已上'; return; }
+  const r=classStore.markTaught(c.id,{from:'button'});
+  if(!r) return;
+  const fresh=classStore.getClass(c.id);
+  applyClass(fresh);
+  const p=r.progress;
+  const action=r.already?'这节已经在历史里，未重复计数':
+    r.converted?'已把最近一条「待上」记为已上':
+    '已补记一条「已上」历史';
+  $('#classNote').textContent=action+' · '+lessonMeterText(p)+
+    (p.left<=2?' · '+(p.over?'已超 '+p.over+' 节':'只剩 '+p.left+' 节，请提前续课'):'');
+  renderClassList();
+  if(!$('#classModal').hidden) renderClassModal();
+}
+function fixDone(){
+  const c=classStore.selectedClass();
+  if(!c){ $('#lpMsg').textContent='先选班级'; return; }
+  const p=classStore.lessonProgress(c.id);
+  let val=Math.round(Number($('#lpDone').value));
+  if(!isFinite(val)) val=p.done;
+  val=Math.max(0,Math.min(200,val));
+  if(val===p.done){ $('#lpMsg').textContent='当前就是第 '+p.done+' 节，无需修正'; return; }
+  const msg=val>p.done
+    ? '把 N 从 '+p.done+' 修正为 '+val+'：补记 '+(val-p.done)+' 条「已上」历史？'
+    : '把 N 从 '+p.done+' 修正为 '+val+'：将 '+(p.done-val)+' 条已上记录标为「已冲正」（历史不删）？';
+  if(!confirm(msg)) return;
+  const r=classStore.correctDone(c.id,val);
+  if(!r) return;
+  const fresh=classStore.getClass(c.id);
+  applyClass(fresh);
+  renderClassList();
+  renderClassModal();
+  $('#lpMsg').textContent='已按历史对齐：'+lessonMeterText(r.progress);
+}
+function historyDrillNames(ids){
+  return ids.map(id=>{ const d=DRILL_BY_ID[id]; return esc(d?d.name:id); }).join('、');
+}
+function renderClassModal(){
+  const c=classStore.selectedClass();
+  const info=$('#classInfo'), box=$('#histList'), panel=$('#lessonPanel');
+  if(!c){
+    info.innerHTML='当前未选班级。先关闭窗口，在顶部选择或新建班级，就能看该班最近 5 次与单条删除。备份仍可导出全部班级与记录。';
+    box.innerHTML='<div class="empty">选一个班级后显示最近 5 次训练</div>';
+    if(panel) panel.hidden=true;
+    return;
+  }
+  const p=classStore.lessonProgress(c.id);
+  info.innerHTML='<b style="color:#fff">'+esc(c.name)+'</b> · '+esc(c.age)+' · '+c.players+' 人 · '+levelName(c.level)+
+    ' · 器材：'+esc(c.equip.join('、')||'徒手')+' · 场地：'+esc(c.venue||'未填')+
+    ' · 历史 '+p.history+' 条 · 已上 '+p.done+' 条';
+  if(panel){
+    panel.hidden=false;
+    $('#lpText').textContent=lessonMeterText(p);
+    $('#lpWarn').textContent=p.left<=2
+      ? (p.over?'已超出总课时 '+p.over+' 节':'只剩 '+p.left+' 节，请提前续课或安排下一期')
+      : '';
+    $('#lpWarn').className='lpWarn'+(p.left<=2?' on':'');
+    $('#lpDone').value=p.done;
+    $('#lpInfo').textContent='已上 '+p.done+' 条 · 待上 '+p.pending+' 条 · 已冲正 '+p.voided+
+      ' 条；N 只由历史里「已上」条数算出，修正会直接改历史标记，不另存第二套数。';
+    $('#lpMsg').textContent='';
+  }
+  const hs=classStore.historyFor(c.id,5);
+  box.innerHTML=hs.length?hs.map(h=>{
+    const tag=h.voided?'<span class="histTag void">已冲正</span>':
+      h.taught?'<span class="histTag">已上</span>':'<span class="histTag pending">待上</span>';
+    return '<div class="histItem"><div class="histTop"><b>'+esc(fmtWhen(h.at))+'</b>'+tag+
+      '<time>'+esc(h.theme)+'</time>'+
+      '<button data-hid="'+esc(h.id)+'">删除</button></div>'+
+    '<div class="histDrills">'+(h.drillIds.length?historyDrillNames(h.drillIds):'（补记，无环节）')+'</div>'+
+    '<div class="histMeta">'+h.duration+' 分钟 · '+h.players+' 人 · '+levelName(h.level)+' · '+
+      h.drillIds.length+' 个环节'+(h.manual?' · 手动补记':'')+'</div></div>';
+  }).join(''):'<div class="empty">这个班还没有上课记录。生成一次教案先记「待上」；点「标记已上」或下课时「结束」，才计入已上节数。</div>';
+}
+function openRecords(){
+  renderClassModal();
+  $('#classModal').hidden=false;
+  document.body.style.overflow='hidden';
+}
+function closeRecords(){
+  $('#classModal').hidden=true;
+  document.body.style.overflow='';
+}
+/* ---- 孩子档案 / 六维评分 ---- */
+let kidCurId=null;
+function kidClass(){ return classStore.selectedClass(); }
+function kidSelected(){
+  const c=kidClass();
+  return c && kidCurId ? classStore.getChild(c.id,kidCurId) : null;
+}
+function fillKidFields(){
+  const k=kidSelected();
+  $('#kidName').value=k?k.name:'';
+  $('#kidNote').value=k?k.note:'';
+}
+function renderKidDetail(){
+  const box=$('#kidDetail'), c=kidClass(), k=kidSelected();
+  if(!k){
+    box.innerHTML='<div class="kidEmpty">'+(c&&c.children.length?'选一个孩子看六项最近分数和最近 3 次备注。':'这个班还没有孩子。填姓名后点「保存孩子」就能开始记录。')+'</div>';
+    return;
+  }
+  const s=classStore.childSummary(c.id,k.id);
+  let h='<div class="kidHero"><b>'+esc(k.name)+'</b><span>'+esc(k.note||'无备注')+' · 共 '+s.count+' 次评分'+
+    (s.latest?' · 最近 '+esc(s.latest.date):'')+'</span></div>';
+  h+='<div class="kidChartBox">'+kidRadarSvg(s.latest,s.prev)+
+    '<p class="kidChartLine" id="kidChartLine">'+esc(kidSummaryText(s.latest,s.prev))+'</p></div>';
+  if(!s.latest){
+    h+='<div class="kidEmpty">还没有评分。选日期，六项各打 1–5 分，保存后这里会显示最近分数、变化方向和最近 3 次备注。</div>';
+  }else{
+    h+='<div class="kidRecent"><div class="kidRecentHead">最近 3 次表现备注<span>按日期新→旧</span></div>'+
+      s.recent.map(a=>'<div class="kidNoteItem"><time>'+esc(a.date.slice(5))+'</time><span>'+
+        esc(a.note||'未填备注')+'</span></div>').join('')+'</div>';
+  }
+  box.innerHTML=h;
+}
+function renderKidModal(){
+  const c=kidClass();
+  $('#kidClassName').textContent=c?c.name:'未选班级';
+  $('#kidNoClass').hidden=!!c;
+  $('#kidBody').hidden=!c;
+  if(!c) return;
+  const kids=c.children;
+  if(kidCurId && !kids.some(k=>k.id===kidCurId)) kidCurId=null;
+  $('#kidSel').innerHTML='<option value="">＋ 新孩子</option>'+
+    kids.map(k=>'<option value="'+esc(k.id)+'">'+esc(k.name)+'</option>').join('');
+  $('#kidSel').value=kidCurId||'';
+  $('#kidCount').textContent=kids.length+' 个孩子 · 每人可多次评分';
+  $('#btnKidDel').disabled=!kidCurId;
+  if(!kids.length) $('#kidHelp').textContent='这个班还没有孩子。填姓名后点「保存孩子」，一个班可以建多个。';
+  else if(!kidCurId) $('#kidHelp').textContent='正在新增孩子。填姓名和备注后点「保存孩子」。';
+  else $('#kidHelp').textContent='改名/改备注后点「保存孩子」；删除会连同该孩子的全部评分一起删。';
+  renderKidDetail();
+  $('#kidAssess').hidden=!kidCurId;
+  if(kidCurId && !$('#kidScoreDate').value) $('#kidScoreDate').value=bcToday();
+}
+function selectKid(id){
+  kidCurId=id||null;
+  fillKidFields();
+  $('#kidScoreMsg').textContent='';
+  renderKidModal();
+}
+function openKids(){
+  const c=kidClass();
+  if(c && c.children.length && !c.children.some(k=>k.id===kidCurId)) kidCurId=c.children[0].id;
+  else if(!c) kidCurId=null;
+  fillKidFields();
+  $('#kidScoreDate').value=bcToday();
+  $('#kidScoreMsg').textContent='';
+  renderKidModal();
+  $('#kidModal').hidden=false;
+  document.body.style.overflow='hidden';
+}
+function closeKids(){
+  $('#kidModal').hidden=true;
+  document.body.style.overflow='';
+}
+function saveKid(){
+  const c=kidClass();
+  if(!c){ $('#kidHelp').textContent='先关闭窗口，在顶部选择或新建班级。'; return; }
+  const name=$('#kidName').value.trim();
+  if(!name){ $('#kidHelp').textContent='先填孩子姓名，再保存。'; $('#kidName').focus(); return; }
+  const input={name:name, note:$('#kidNote').value.trim()};
+  if(kidCurId) input.id=kidCurId;
+  const k=classStore.saveChild(c.id,input);
+  if(!k) return;
+  kidCurId=k.id;
+  fillKidFields();
+  $('#kidScoreMsg').textContent='已保存「'+k.name+'」';
+  renderKidModal();
+  renderKidBoard();
+}
+function deleteKid(){
+  const c=kidClass(), k=kidSelected();
+  if(!c||!k) return;
+  if(!confirm('删除「'+k.name+'」和 TA 的 '+k.assessments.length+' 条评分？删除后不可恢复。')) return;
+  classStore.deleteChild(c.id,k.id);
+  const left=classStore.listChildren(c.id);
+  kidCurId=left.length?left[0].id:null;
+  fillKidFields();
+  $('#kidScoreMsg').textContent='已删除「'+k.name+'」';
+  renderKidModal();
+  renderKidBoard();
+}
+function saveKidScore(){
+  const c=kidClass(), k=kidSelected();
+  if(!c||!k){ $('#kidScoreMsg').textContent='先选一个孩子，再记评分。'; return; }
+  const date=$('#kidScoreDate').value;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){ $('#kidScoreMsg').textContent='先选评分日期。'; $('#kidScoreDate').focus(); return; }
+  const a=classStore.addAssessment(c.id,k.id,{
+    date:date,
+    dribble:$('#kidDribble').value, pass:$('#kidPass').value,
+    shoot:$('#kidShoot').value, defense:$('#kidDefense').value,
+    stamina:$('#kidStamina').value, iq:$('#kidIq').value,
+    note:$('#kidScoreNote').value.trim()
+  });
+  if(!a){ $('#kidScoreMsg').textContent='保存失败，请重试。'; return; }
+  $('#kidScoreNote').value='';
+  $('#kidScoreMsg').textContent='已记录 '+a.date+' 的六项评分';
+  renderKidModal(); renderKidBoard();
+}
+function initKidUI(){
+  $('#btnKids').addEventListener('click',openKids);
+  $('#btnCloseKid').addEventListener('click',closeKids);
+  $('#kidModal').addEventListener('click',e=>{ if(e.target.id==='kidModal') closeKids(); });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape' && !$('#kidModal').hidden) closeKids(); });
+  $('#kidSel').addEventListener('change',()=>selectKid($('#kidSel').value));
+  $('#btnKidNew').addEventListener('click',()=>selectKid(null));
+  $('#btnKidSave').addEventListener('click',saveKid);
+  $('#btnKidDel').addEventListener('click',deleteKid);
+  $('#btnKidScore').addEventListener('click',saveKidScore);
+  $('#kidName').addEventListener('keydown',e=>{ if(e.key==='Enter') saveKid(); });
+  $('#kidScoreNote').addEventListener('keydown',e=>{ if(e.key==='Enter') saveKidScore(); });
+  const kb=$('#kidBoardList');
+  if(kb) kb.addEventListener('click',e=>{
+    const b=e.target && e.target.closest ? e.target.closest('.kbTap') : null;
+    if(!b) return;
+    kidCurId=b.getAttribute('data-kid')||null;
+    openKids();
+  });
+}
+function exportBackup(){
+  const data=classStore.exportData();
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='篮球教案备份-'+data.exportedAt.slice(0,10)+'.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1500);
+}
+function triggerImport(){
+  if(!confirm('导入会覆盖本机全部班级与上课记录，原来的数据将被替换。确定继续？')) return;
+  $('#importFile').click();
+}
+function handleImport(file){
+  const rd=new FileReader();
+  rd.onload=function(){
+    try{
+      const counts=classStore.importData(String(rd.result));
+      const first=classStore.listClasses()[0];
+      classStore.select(first?first.id:null);
+      refreshClassSelect();
+      if(first) applyClass(first);
+      else { $('#classNote').textContent=classNote(null); syncClassEditor(null); }
+      if($('#planStage').dataset.stage==='plan') editNeeds();
+      renderClassModal();
+      if(!$('#kidModal').hidden) renderKidModal();
+      alert('导入完成：'+counts.classes+' 个班级，'+(counts.children||0)+' 个孩子，'+counts.history+' 条上课记录');
+    }catch(err){ alert('导入失败：'+((err&&err.message)||'文件读不出')); }
+    $('#importFile').value='';
+  };
+  rd.readAsText(file);
+}
+function initClassUI(){
+  refreshClassSelect();
+  const c=classStore.selectedClass();
+  if(c) applyClass(c); else $('#classNote').textContent=classNote(null);
+  renderClassList();
+  const sel=classStore.selectedClass();
+  if(sel) syncClassEditor(sel);
+  $('#classSel').addEventListener('change',()=>{
+    const id=$('#classSel').value;
+    const cls=id?classStore.getClass(id):null;
+    if(!cls){ classStore.select(null); renderLessonMeter(null);
+      $('#classNote').textContent=classNote(null); renderClassList(); return; }
+    classStore.select(cls.id); applyClass(cls); renderClassList();
+    if($('#planStage').dataset.stage==='plan') editNeeds();
+  });
+  $('#btnManageClass').addEventListener('click',()=>switchView('class'));
+  $('#classListBox').addEventListener('click',e=>{
+    const row=e.target.closest('[data-cid]'); if(!row) return;
+    pickClass(row.dataset.cid);
+  });
+  $('#btnClassDel').addEventListener('click',deleteClassFromEditor);
+  $('#btnNewClass').addEventListener('click',newClass);
+  $('#btnNewClassX').addEventListener('click',()=>closeNewClass(true));
+  $('#btnNewClassCancel').addEventListener('click',()=>closeNewClass(true));
+  $('#btnNewClassOk').addEventListener('click',createClassFromPrompt);
+  $('#newClassName').addEventListener('keydown',e=>{
+    if(e.key==='Enter' && !e.isComposing){ e.preventDefault(); createClassFromPrompt(); }
+  });
+  $('#newClassModal').addEventListener('click',e=>{
+    if(e.target.id==='newClassModal') closeNewClass(true);
+  });
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape' && !$('#newClassModal').hidden) closeNewClass(true);
+  });
+  $('#btnSaveClass').addEventListener('click',saveClassFromForm);
+  $('#btnTaught').addEventListener('click',markTaughtSelected);
+  $('#btnFixDone').addEventListener('click',fixDone);
+  $('#fTotal').addEventListener('change',()=>{
+    const v=bcInt($('#fTotal').value,1,200,10);
+    $('#fTotal').value=v;
+    const sel=classStore.selectedClass();
+    if(!sel){ $('#classEditHint').textContent='先在上面列表里点一个班，再改总课时'; return; }
+    const up=classStore.setTotalLessons(sel.id,v);
+    if(!up) return;
+    renderLessonMeter(up);
+    renderClassList();
+    const p=classStore.lessonProgress(sel.id);
+    $('#classEditHint').textContent='总课时已改为 '+v+' 节：已上 '+p.done+' 节，剩 '+p.left+' 节'+
+      (p.over?'（已超 '+p.over+' 节）':'');
+    if(!$('#classModal').hidden) renderClassModal();
+  });
+  $('#btnRecords').addEventListener('click',openRecords);
+  $('#btnCloseModal').addEventListener('click',closeRecords);
+  $('#classModal').addEventListener('click',e=>{ if(e.target.id==='classModal') closeRecords(); });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape' && !$('#classModal').hidden) closeRecords(); });
+  $('#histList').addEventListener('click',e=>{
+    const btn=e.target.closest('[data-hid]'); if(!btn) return;
+    if(!confirm('删除这条上课记录？删除后不再计入该班最近 2 次轮换，已上节数 N 也会跟着重算。')) return;
+    classStore.deleteHistory(btn.dataset.hid);
+    renderClassModal();
+    renderClassList();
+    const sel=classStore.selectedClass(); if(sel) $('#classNote').textContent=classNote(sel);
+  });
+  $('#btnExport').addEventListener('click',exportBackup);
+  $('#btnImport').addEventListener('click',triggerImport);
+  $('#importFile').addEventListener('change',e=>{
+    const f=e.target.files&&e.target.files[0];
+    if(f) handleImport(f); else e.target.value='';
+  });
+}
+
+/* ---- 规则页：只写能引出原文的 U8/U10/U12，不做核验状态表 ---- */
+/* #194 窄屏不要六列表格：一档一张卡（球 / 篮圈 / 场地 / 罚球三分 各一行），原文收进折叠；
+   宽屏仍是上面那张表，两份都在 DOM 里，用媒体查询二选一，桌面一个字都不动。 */
+const RULE_ROWS = [['球','ball'],['篮圈','hoop'],['场地','court'],['罚球三分','ft']];
+function ruleCardHtml(r){
+  return '<article class="ruleCard" data-age="'+esc(r.age)+'">'+
+    '<h3>'+esc(AGE_FULL[r.age]||r.age)+'</h3>'+
+    RULE_ROWS.map(x=>'<div class="rRow"><span class="rTag">'+x[0]+'</span><span class="rVal">'+esc(r[x[1]])+'</span></div>').join('')+
+    '<details class="rSrc"><summary>原文</summary>'+
+      (r.quote?'<p class="quote">'+esc(r.quote)+'</p>'
+             :'<p class="rNo">这一档不引条款原文：上面四行是常见器材与标准场地的常识表述。</p>')+
+    '</details></article>';
+}
+function renderRules(){
+  let h='<table class="rulesTbl"><thead><tr><th>年龄段</th><th>篮球</th><th>篮圈高度</th><th>场地</th><th>罚球/三分</th><th>原文</th></tr></thead><tbody>';
+  RULES.forEach(r=>{
+    h+='<tr><td><b>'+esc(AGE_FULL[r.age]||r.age)+'</b></td>'+
+       '<td data-label="篮球">'+esc(r.ball)+'</td><td data-label="篮圈">'+esc(r.hoop)+'</td>'+
+       '<td data-label="场地">'+esc(r.court)+'</td><td data-label="罚球/三分">'+esc(r.ft)+'</td>'+
+       '<td class="src" data-label="原文">'+(r.quote?'<div class="quote">'+esc(r.quote)+'</div>':'—')+'</td></tr>';
+  });
+  h+='</tbody></table>';
+  h+='<div class="ruleCards">'+RULES.map(ruleCardHtml).join('')+'</div>';
+  h+='<p class="rulesFrom">U8 / U10 / U12 三行的数值引自中国篮协《小篮球规则》(2017版) 第2/3/4条原文；幼儿、青少年、成人三行是常见器材与标准场地的常识表述，不引条款原文。</p>';
+  $('#rulesBox').innerHTML=h;
+}
+
+/* ---- 动作库 ---- */
+function libFiltered(){
+  const a=$('#lAge').value, d=$('#lDim').value, q=$('#lQ').value.trim().toLowerCase();
+  return DRILLS.filter(x=>{
+    if(a && !x.age.includes(a)) return false;
+    if(d && x.dim!==d) return false;
+    if(q){
+      const hay=(x.name+' '+x.points.join(' ')+' '+x.errors.map(e=>e[0]+e[1]).join(' ')+' '+x.dim+' '+x.theme.join(' ')).toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+function drillCard(d){
+  const id='d_'+d.id;
+  return '<article class="drill closed" id="'+id+'">'+
+    '<div class="top">'+svgDiagram(d.lay)+
+      '<div><h4>'+esc(d.name)+'</h4><div class="badges">'+d.age.map(a=>'<span class="badge age">'+esc(ageShort(a))+'</span>').join('')+
+      '<span class="badge dim">'+esc(d.dim)+'</span><span class="badge">'+d.dur+' 分钟</span>'+
+      (d.equip.length?'<span class="badge">'+esc(d.equip.join(' / '))+'</span>':'<span class="badge">徒手</span>')+
+      '</div><div class="hint" style="margin-top:6px">'+esc(d.points[0])+'</div></div></div>'+
+    '<div class="det"><dl>'+
+      '<dt>技术要点（3 条）</dt><dd><ul>'+d.points.map(p=>'<li>'+esc(p)+'</li>').join('')+'</ul></dd>'+
+      '<dt>常见错误 → 纠正口令</dt><dd><ul>'+d.errors.map(e=>'<li>'+esc(e[0])+' → <b style="color:#ffcc4d">'+esc(e[1])+'</b></li>').join('')+'</ul></dd>'+
+      '<dt>进阶 / 退化</dt><dd>↑ '+esc(d.up)+'<br>↓ '+esc(d.down)+'</dd>'+
+      '<dt>可量化评估</dt><dd>'+esc(d.assess)+'</dd>'+
+      '<dt>家长一句话</dt><dd>'+esc(d.parent)+'</dd>'+
+    '</dl></div>'+
+    '<button class="more">展开 / 收起详情</button></article>';
+}
+function renderLib(){
+  const list=libFiltered();
+  if(!list.length){ $('#libGrid').innerHTML='<div class="empty">没有符合条件的环节，放宽筛选试试</div>'; return; }
+  /* #194 窄屏按能力维度分组、可折叠，默认只开第一组；宽屏分组标题不显示，
+     所有卡片照样平铺（= 改动前的样子），折叠状态在宽屏也不生效。 */
+  const order=[], bucket=new Map();
+  list.forEach(d=>{ if(!bucket.has(d.dim)){ bucket.set(d.dim,[]); order.push(d.dim); } bucket.get(d.dim).push(d); });
+  $('#libGrid').innerHTML = order.map((dim,i)=>{
+    const ds=bucket.get(dim), open=i===0;
+    return '<section class="libGroup'+(open?'':' folded')+'" data-dim="'+esc(dim)+'">'+
+      '<button class="libGH" type="button" aria-expanded="'+(open?'true':'false')+'">'+
+        '<span class="lgName">'+esc(dim)+'</span>'+
+        '<span class="lgN">'+ds.length+' 个动作</span><span class="lgCv">▾</span></button>'+
+      '<div class="libBody">'+ds.map(drillCard).join('')+'</div></section>';
+  }).join('');
+  document.querySelectorAll('#libGrid .more').forEach(b=>b.addEventListener('click',e=>{ e.stopPropagation(); b.closest('.drill').classList.toggle('closed'); }));
+  document.querySelectorAll('#libGrid .drill').forEach(el=>el.addEventListener('dblclick',()=>el.classList.toggle('closed')));
+  document.querySelectorAll('#libGrid .libGH').forEach(b=>b.addEventListener('click',()=>{
+    const g=b.closest('.libGroup'); if(!g) return;
+    const folded=g.classList.toggle('folded');
+    b.setAttribute('aria-expanded', folded?'false':'true');
+  }));
+}
+
+/* ---- 排课 ---- */
+function blockHTML(b,i){
+  const d=b.d;
+  const isReuse=!!(lesson && lesson.reusedIds && lesson.reusedIds.includes(d.id));
+  const isAlt=!!(lesson && lesson.siteFallback);
+  return '<div class="block">'+
+    '<div class="idx">'+String(i+1).padStart(2,'0')+'<b>'+phaseName(b.phase)+'</b>'+b.minutes+'′</div>'+
+    '<div><h3>'+esc(d.name)+'</h3><div class="meta"><span>'+d.age.join('/')+'</span><span>'+esc(d.dim)+'</span>'+
+      '<span>'+(d.equip.length?esc(d.equip.join('、')):'徒手')+'</span><span>建议 '+b.sets+' 组轮换</span>'+
+      (isAlt?'<span class="badge altBadge">替代</span>':(isReuse?'<span class="badge reuseBadge">复用</span>':''))+'</div>'+
+      '<div class="body"><div class="txt">'+
+        '<div class="line"><b>要点</b> '+esc(d.points[0])+'</div>'+
+        '<div class="line"><b>要点</b> '+esc(d.points[1])+'</div>'+
+        '<div class="line cue">口令：'+esc(d.errors[0][1])+'</div>'+
+        '<div class="line" style="color:#9aa6b8">评估：'+esc(d.assess)+'</div>'+
+        '<div class="line" style="color:#9aa6b8">家长话术：'+esc(d.parent)+'</div>'+
+      '</div><div class="svgWrap">'+svgDiagram(d.lay)+'</div></div>'+
+    '</div></div>';
+}
+function renderPlan(){
+  if(!lesson){ return; }
+  const L=lesson;
+  const rc=$('#reportCard');
+  if(rc){ rc.hidden=true; const ta=$('#reportText'); if(ta) ta.value=''; const st=$('#reportStatus'); if(st) st.textContent=''; }
+  const h=[]; 
+  if(L.reused) h.push('<div class="reuseNote">复用（可选环节不足）：本班最近 2 次已用过的环节，已优先避开；标「复用」的环节因可替换环节不够而再次使用。</div>');
+  h.push('<div class="siteNote"><b>场地条件：</b>'+esc(siteLabel(L.site))+'。按此条件过滤环节池，跳过原因见下方可展开项。</div>');
+  if(L.bandNote) h.push('<div class="bandNote"><b>'+esc(L.band)+'档时长规则：</b>'+esc(L.bandNote)+'</div>');
+  h.push('<div class="planHead"><div><div class="big">'+esc(ageName(L.cfg.age))+' · '+esc(L.cfg.theme)+' · '+L.cfg.duration+' 分钟</div>'+
+    '<div class="hint">'+L.cfg.players+' 人 · 难度 '+L.cfg.level+' · 器材：'+esc(L.equipUsed.join('、')||'徒手')+' · 排课结果'+(L.exact?'精确配平':'已按可用环节近似配平')+'</div></div>'+
+    '<div class="planActions" style="margin-left:auto;display:flex;gap:8px"><button class="primary" id="btnTimer">开始上课</button><button id="btnReport">生成课报</button><button onclick="window.print()">打印教案</button></div></div>');
+  h.push('<div class="card" style="margin-bottom:12px"><h2>本课结构</h2><div class="sum">'+
+    '<span>热身 <b>'+L.warm.reduce((s,b)=>s+b.minutes,0)+'′</b></span>'+
+    '<span>主课 <b>'+L.main.reduce((s,b)=>s+b.minutes,0)+'′</b></span>'+
+    '<span>放松 <b>'+L.cool.reduce((s,b)=>s+b.minutes,0)+'′</b></span>'+
+    '<span>合计 <b>'+L.total+'′</b> / 目标 '+L.cfg.duration+'′</span>'+
+    '<span>环节 <b>'+L.blocks.length+'</b> 个</span></div></div>');
+  h.push(L.blocks.map(blockHTML).join(''));
+  if(L.siteFallback){
+    h.push('<div class="siteWarn"><b>替代方案（已标注）：</b>当前条件下没有可用的主课环节，已改用无筐/半场安全清单：'+
+      esc(L.blocks.map(b=>b.d.name).join('、'))+'。这些环节均带「替代」标记，不是原条件筛选结果，请按现场人数调整。</div>');
+  }
+  const skipped=L.siteSkipped||[];
+  h.push('<details class="siteWhy" id="whySkip"><summary>为什么没选某些环节（'+skipped.length+'）</summary>'+
+    (skipped.length
+      ? '<ul>'+skipped.map(x=>'<li><b>'+esc(x.name)+'</b>：'+esc(x.reason)+'。</li>').join('')+'</ul>'
+      : '<div style="margin-top:8px">本次场地条件下没有需要跳过的环节。</div>')+
+    '</details>');
+  h.push('<div class="card"><h2>教练备忘</h2><div class="hint" style="font-size:12.5px;line-height:1.7">'+
+    '① 每个环节先做 1 次慢速示范，再让孩子做；口令只喊一句，不喊三句。<br>'+
+    '② U8 单环节不超过 10 分钟，注意力散了就换游戏化玩法；U12 对抗后必须留 30 秒喝水。<br>'+
+    '③ 评估数据当场记在手机备忘录：命中数 / 成功次数 / 掉球数，下节课对比。<br>'+
+    '④ 家长话术每条都已写好，下课直接发群里，不临时编。<br>'+
+    '⑤ 青少年 / 成人单环节 12–15 分钟，热身和放松不能省；幼儿档单环节 4–5 分钟、整堂课 30–40 分钟，中间必须停下来喝水休息。</div></div>');
+  $('#planOut').innerHTML=h.join('');
+  $('#btnTimer').addEventListener('click',()=>startTimer(L.blocks));
+  $('#btnReport').addEventListener('click',showReport);
+}
+function setReportStatus(msg){
+  const el=$('#reportStatus'); if(el) el.textContent=msg;
+}
+function selectReportText(){
+  const ta=$('#reportText'); if(!ta) return false;
+  ta.focus();
+  try{ ta.select(); ta.setSelectionRange(0, ta.value.length); }
+  catch(e){ try{ ta.select(); }catch(e2){} }
+  return true;
+}
+function hideReport(){
+  const card=$('#reportCard'); if(card) card.hidden=true;
+  setReportStatus('');
+}
+function showReport(){
+  if(!lesson){ setReportStatus('请先生成教案'); return; }
+  const text=parentReport(lesson, bcToday());
+  const card=$('#reportCard'), ta=$('#reportText');
+  if(!text || !card || !ta){ setReportStatus('暂时没有可生成的课报'); return; }
+  ta.value=text;
+  card.hidden=false;
+  setReportStatus('共 '+Array.from(text).length+' 字（上限 200 字）');
+  try{ card.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+  catch(e){ try{ card.scrollIntoView(); }catch(e2){} }
+}
+function copyReport(){
+  const ta=$('#reportText');
+  if(!ta || !ta.value){ setReportStatus('请先生成课报'); return; }
+  selectReportText();
+  let copied=false;
+  try{ copied=!!(document.execCommand && document.execCommand('copy')); }catch(e){ copied=false; }
+  if(copied){ setReportStatus('已复制，可直接粘贴到微信'); return; }
+  let settled=false;
+  const ok=()=>{ if(settled) return; settled=true; setReportStatus('已复制，可直接粘贴到微信'); };
+  const fail=()=>{
+    if(settled) return; settled=true;
+    selectReportText();
+    setReportStatus('复制失败，已全选，请按 Ctrl+C 或长按复制');
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    const timer=setTimeout(fail, 1500);
+    try{
+      const p=navigator.clipboard.writeText(ta.value);
+      if(!p || typeof p.then!=='function'){ clearTimeout(timer); fail(); return; }
+      p.then(function(){ clearTimeout(timer); ok(); }).catch(function(){ clearTimeout(timer); fail(); });
+    }catch(e){
+      clearTimeout(timer); fail();
+    }
+    return;
+  }
+  fail();
+}
+function initReportUI(){
+  $('#btnCopyReport').addEventListener('click',copyReport);
+  $('#btnCloseReport').addEventListener('click',hideReport);
+}
+function levelName(n){ return n===1?'入门':n===3?'提高':'进阶'; }
+function ageName(a){ return a==='MIX' ? '混龄 U8–U12' : ageShort(a); }
+function build(){
+  const durSel=$('#fDur').value;
+  const duration = durSel==='-1' ? Number($('#fDurCustom').value)||60 : Number(durSel);
+  const cfg={age:$('#fAge').value, theme:$('#fTheme').value, duration:duration,
+    players:Number($('#fPlayers').value)||12, level:Number($('#fLevel').value), equip:getEquip(),
+    venue:$('#fVenue').value.trim(),
+    site:{place:$('#fPlace').value, hoop:$('#fHoop').value, court:$('#fCourt').value, tight:$('#fTight').checked}};
+  const cls=classStore.selectedClass();
+  lesson=generateLesson(cfg, cls?cls.id:null);
+  renderPlan();
+  $('#sumMain').textContent=ageName(cfg.age)+' · '+cfg.theme+' · '+cfg.duration+' 分钟 · '+cfg.players+' 人 · '+levelName(cfg.level);
+  $('#planStage').dataset.stage='plan';
+  $('#planWrap').hidden=false;
+  $('#planSummary').hidden=false;
+  $('#classBar').classList.add('wide');
+  let hint='已生成：'+lesson.blocks.length+' 个环节，合计 '+lesson.total+' 分钟'+(lesson.exact?'，与目标完全一致':'（可用环节组合受限，已近似配平）');
+  hint+='；场地：'+siteLabel(lesson.site);
+  if(lesson.siteSkipped && lesson.siteSkipped.length) hint+='；按场地跳过 '+lesson.siteSkipped.length+' 个环节';
+  if(lesson.siteFallback) hint+='；已给替代方案（带「替代」标记）';
+  if(cls){
+    const p=classStore.lessonProgress(cls.id);
+    hint+='；已记入「'+cls.name+'」第 '+p.history+' 条历史（待上，点「标记已上」或下课时「结束」才计入）';
+    hint+='；当前 '+lessonMeterText(p);
+    if(lesson.rotationExcluded) hint+='；最近 2 次 '+lesson.rotationExcluded+' 个环节已优先避开';
+    if(lesson.reused) hint+='；可选环节不足，复用部分已标黄';
+    $('#classNote').textContent=classNote(cls);
+  }
+  $('#buildHint').textContent=hint;
+  window.scrollTo(0,0);
+}
+function editNeeds(){
+  $('#planStage').dataset.stage='form';
+  $('#planWrap').hidden=true;
+  $('#planSummary').hidden=true;
+  $('#classBar').classList.remove('wide');
+  window.scrollTo(0,0);
+}
+$('#fDur').addEventListener('change',()=>{ $('#fDurCustom').style.display = $('#fDur').value==='-1'?'block':'none'; });
+$('#btnBuild').addEventListener('click',build);
+$('#btnEdit').addEventListener('click',editNeeds);
+
+/* ---- 计时器 ---- */
+function beep(freq){
+  try{
+    const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+    const ctx=beep.ctx||(beep.ctx=new AC());
+    const o=ctx.createOscillator(), g=ctx.createGain();
+    o.frequency.value=freq||880; o.type='sine'; g.gain.value=.06;
+    o.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime+.16);
+  }catch(e){}
+}
+let runWakeLock=null, wakePending=false;
+async function requestWakeLock(){
+  if(wakePending) return;
+  try{
+    if(!('wakeLock' in navigator) || !navigator.wakeLock || typeof navigator.wakeLock.request!=='function') return;
+    if(document.visibilityState && document.visibilityState!=='visible') return;
+    if(runWakeLock) return;
+    wakePending=true;
+    const lock=await navigator.wakeLock.request('screen');
+    wakePending=false;
+    if(!timer.open){ try{ if(lock&&lock.release) lock.release(); }catch(e){} return; }
+    runWakeLock=lock;
+    if(lock && lock.addEventListener) lock.addEventListener('release',()=>{ runWakeLock=null; });
+  }catch(e){ wakePending=false; runWakeLock=null; }
+}
+function releaseWakeLock(){
+  try{ if(runWakeLock && runWakeLock.release) runWakeLock.release(); }catch(e){}
+  runWakeLock=null;
+}
+function showRun(){
+  if(!timer.open) timer.scrollY=window.scrollY||0;
+  timer.open=true;
+  const bar=$('#timerBar');
+  bar.classList.add('on'); bar.setAttribute('aria-hidden','false');
+  document.body.classList.add('runOpen');
+  updateTimerUI();
+  requestWakeLock();
+}
+function startTimer(blocks){
+  blocks=Array.isArray(blocks)?blocks:[];
+  if(!blocks.length) return;
+  if(timer.src===blocks && timer.blocks.length && !timer.done && timer.left>0){
+    showRun(); return;
+  }
+  timer.blocks=blocks.map(b=>({name:b.d.name, minutes:b.minutes, phase:b.phase,
+    points:Array.isArray(b.d.points)?b.d.points:[], cue:(b.d.errors&&b.d.errors[0]&&b.d.errors[0][1])||'—',
+    assess:b.d.assess||'—'}));
+  timer.src=blocks; timer.i=0; timer.run=false; timer.done=false; timer.uiIndex=-1;
+  timer.classId=lesson&&lesson.history?lesson.history.classId:null;
+  timer.historyId=lesson&&lesson.history?lesson.history.id:null;
+  timer.total=timer.blocks.reduce((s,b)=>s+b.minutes,0);
+  timer.left=timer.blocks[0].minutes*60;
+  showRun();
+  if(timer.id) clearInterval(timer.id);
+  timer.id=setInterval(tick,1000);
+  timer.run=true;
+  updateTimerUI();
+  requestWakeLock();
+}
+function pad2(n){ n=Math.max(0,Math.round(Number(n)||0)); return (n<10?'0':'')+n; }
+function updateTimerUI(){
+  const meta=timerMeta(timer.blocks,timer.i,timer.left);
+  if(!meta.count) return;
+  const b=timer.blocks[meta.i];
+  $('#tStep').textContent=pad2(meta.step);
+  $('#tCount').textContent=pad2(meta.count);
+  $('#tTotal').textContent=meta.totalClock;
+  $('#tName').textContent=meta.name;
+  $('#tMin').textContent=meta.minutes+' 分钟';
+  $('#tSub').textContent=phaseName(meta.phase)+' · 第 '+meta.step+' 个环节'+(timer.done?' · 已结束':'');
+  $('#tClock').textContent=meta.clock;
+  $('#tProg').style.width=meta.progress+'%';
+  if(timer.uiIndex!==meta.i){
+    timer.uiIndex=meta.i;
+    $('#tPoints').innerHTML=(b.points||[]).map(p=>'<li>'+esc(p)+'</li>').join('');
+    $('#tCue').textContent=b.cue||'—';
+    $('#tAssess').textContent=b.assess||'—';
+  }
+  const full=Math.max(1,Math.round(b.minutes*60));
+  $('#tToggle').textContent=timer.done?'重新开始':timer.run?'暂停':(timer.left>=full?'开始':'继续');
+  $('#tPrev').disabled=meta.i<=0;
+  $('#tSkip').disabled=timer.done||meta.i>=meta.count-1;
+  $('#tNext').disabled=timer.done||meta.i>=meta.count-1;
+}
+function tick(){
+  if(!timer.run) return;
+  timer.left--;
+  if(timer.left<=0){
+    beep(1040);
+    if(timer.i<timer.blocks.length-1){
+      timer.i++; timer.left=timer.blocks[timer.i].minutes*60; timer.uiIndex=-1;
+    } else { finishTimer(); return; }
+  }
+  updateTimerUI();
+}
+function markRunTaught(){
+  if(!timer.classId) return;
+  const r=classStore.markTaught(timer.classId,{from:'finish',historyId:timer.historyId});
+  if(!r) return;
+  const fresh=classStore.getClass(timer.classId);
+  if(fresh && classStore.selectedId()===fresh.id){
+    renderLessonMeter(fresh);
+    $('#classNote').textContent=classNote(fresh);
+    if(!$('#classModal').hidden) renderClassModal();
+  }
+}
+function finishTimer(){
+  timer.left=0; timer.run=false; timer.done=true;
+  if(timer.id){ clearInterval(timer.id); timer.id=null; }
+  releaseWakeLock();
+  markRunTaught();
+  updateTimerUI();
+}
+function toggleTimer(){
+  if(!timer.blocks.length) return;
+  if(timer.done){
+    timer.done=false; timer.i=0; timer.left=timer.blocks[0].minutes*60; timer.uiIndex=-1;
+    timer.run=true;
+  } else {
+    timer.run=!timer.run;
+  }
+  if(timer.run){
+    if(!timer.id) timer.id=setInterval(tick,1000);
+    requestWakeLock();
+  } else if(timer.id){
+    clearInterval(timer.id); timer.id=null;
+  }
+  updateTimerUI();
+}
+function prevBlock(){
+  if(timer.i<=0) return;
+  timer.i--; timer.left=timer.blocks[timer.i].minutes*60; timer.done=false; timer.uiIndex=-1;
+  updateTimerUI();
+}
+function resetBlock(){
+  if(!timer.blocks.length) return;
+  timer.left=timer.blocks[timer.i].minutes*60; timer.done=false; timer.uiIndex=-1;
+  timer.run=false;
+  if(timer.id){ clearInterval(timer.id); timer.id=null; }
+  updateTimerUI();
+}
+function skipBlock(){
+  if(!timer.blocks.length) return;
+  if(timer.i>=timer.blocks.length-1){ finishTimer(); return; }
+  timer.i++; timer.left=timer.blocks[timer.i].minutes*60; timer.done=false; timer.uiIndex=-1;
+  updateTimerUI();
+}
+function nextBlock(){
+  if(!timer.blocks.length) return;
+  if(timer.i>=timer.blocks.length-1){ finishTimer(); return; }
+  timer.i++; timer.left=timer.blocks[timer.i].minutes*60; timer.done=false; timer.uiIndex=-1;
+  timer.run=false;
+  if(timer.id){ clearInterval(timer.id); timer.id=null; }
+  updateTimerUI();
+}
+function restorePlanScroll(){
+  const y=timer.scrollY||0;
+  setTimeout(()=>{ try{ window.scrollTo(0,y); }catch(e){} },0);
+}
+function exitRun(){
+  timer.run=false; timer.open=false;
+  if(timer.id){ clearInterval(timer.id); timer.id=null; }
+  const bar=$('#timerBar');
+  bar.classList.remove('on'); bar.setAttribute('aria-hidden','true');
+  document.body.classList.remove('runOpen');
+  releaseWakeLock(); restorePlanScroll();
+  const btn=$('#btnTimer');
+  if(btn) btn.textContent=timer.done?'开始上课':'继续上课';
+}
+function stopTimer(){
+  timer.run=false; timer.open=false;
+  if(timer.id){clearInterval(timer.id); timer.id=null;}
+  markRunTaught();
+  timer.blocks=[]; timer.src=null; timer.i=0; timer.left=0; timer.total=0;
+  timer.done=false; timer.uiIndex=-1; timer.classId=null; timer.historyId=null;
+  const bar=$('#timerBar');
+  bar.classList.remove('on'); bar.setAttribute('aria-hidden','true');
+  document.body.classList.remove('runOpen');
+  releaseWakeLock(); restorePlanScroll();
+  const btn=$('#btnTimer'); if(btn) btn.textContent='开始上课';
+}
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible' && timer.open && timer.run) requestWakeLock();
+});
+$('#tToggle').addEventListener('click',toggleTimer);
+$('#tPrev').addEventListener('click',prevBlock);
+$('#tReset').addEventListener('click',resetBlock);
+$('#tSkip').addEventListener('click',skipBlock);
+$('#tNext').addEventListener('click',nextBlock);
+$('#tExit').addEventListener('click',exitRun);
+$('#tStop').addEventListener('click',stopTimer);
+
+/* ---- 初始化 ---- */
+(function init(){
+  initEquip();
+  initClassUI();
+  initKidUI();
+  THEMES.forEach(t=>{ if(t==='综合')return; const o=document.createElement('option'); o.value=t; o.textContent=t; $('#lDim').appendChild(o); });
+  renderRules(); renderLib();
+  initFirstAidFold();
+  initReportUI();
+  $('#lAge').addEventListener('change',renderLib); $('#lDim').addEventListener('change',renderLib);
+  $('#lQ').addEventListener('input',renderLib);
+})();
+</script>
+<script>
+/* 离线 PWA：只在 http(s) 下注册；用 file:// 双击打开时静默跳过 */
+if ('serviceWorker' in navigator && (location.protocol === 'http:' || location.protocol === 'https:')) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./sw.js').catch(function () {});
+  });
+}
+</script>
+</body>
+</html>

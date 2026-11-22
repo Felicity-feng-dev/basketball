@@ -1,0 +1,12 @@
+{
+  "name": "篮球教案工具 · 青训排课与动作库",
+  "short_name": "篮球教案",
+  "description": "青少年篮球教练的离线排课、动作库与上课计时工具",
+  "lang": "zh-CN",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f1115",
+  "theme_color": "#f57c00"
+}
