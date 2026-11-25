@@ -1,0 +1,9 @@
+# 运行时产物，不进仓库（2026-11-26 老板：仓库界面太乱）
+自动发布.log
+自动发布.pid
+自测.log
+*.log
+*.pid
+node_modules/
+.DS_Store
+Thumbs.db
